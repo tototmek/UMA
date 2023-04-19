@@ -3,7 +3,7 @@ import pygame
 import time
 
 
-simulation = engine.Simulation()
+simulation = engine.Simulation(track_inclination=lambda x: 0.1 * x)
 
 pygame.init()
 window = pygame.display.set_mode((960, 540))
@@ -23,7 +23,7 @@ while running:
             running = False
 
     window.fill(black)
-    simulation.step(0.1, 1.0)
+    simulation.step(0.1, 0.0)
     draw_circle(simulation.getCartPosition(), 200)
     pygame.display.update()
     time.sleep(0.017)

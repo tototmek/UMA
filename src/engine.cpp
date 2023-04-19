@@ -1,6 +1,7 @@
 #include "engine.h"
 
 #include <cmath>
+#include <iostream>
 
 static const float gravity = 9.81f;
 
@@ -10,6 +11,12 @@ void Cart::step(float deltatime) {
     position += velocity * deltatime;
 }
 
+void Cart::reset() {
+    position = 0;
+    velocity = 0;
+    force = 0;
+}
+
 void Simulation::step(float deltatime, float cartThrust) {
     float cartPosition = cart.getPosition();
     float inclination = getInclinationAt(cartPosition);
@@ -17,24 +24,8 @@ void Simulation::step(float deltatime, float cartThrust) {
     cart.applyForce(gravityX);
     cart.applyForce(cartThrust);
     cart.step(deltatime);
+    std::cout << "Inclination: " << inclination << "\n";
+    std::cout << "GravityX: " << gravityX << "\n";
 }
 
-Simulation::Simulation() {
-    inclinationMap = [](float x) {
-        (void)x;
-        return 0.0f;
-    };
-}
-
-float Simulation::getInclinationAt(float x) { return inclinationMap(x); }
-
-#include <pybind11/pybind11.h>
-
-namespace py = pybind11;
-
-PYBIND11_MODULE(engine, m) {
-    py::class_<Simulation>(m, "Simulation")
-        .def(py::init<>())
-        .def("step", &Simulation::step)
-        .def("getCartPosition", &Simulation::getCartPosition);
-}
+float Simulation::getInclinationAt(float x) { return inclination(x); }

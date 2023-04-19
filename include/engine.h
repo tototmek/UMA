@@ -1,7 +1,6 @@
 #include <functional>
+#include <map>
 #include <vector>
-
-int add(int, int);
 
 class Cart {
    private:
@@ -11,16 +10,20 @@ class Cart {
     float getPosition() { return position; }
     void applyForce(float f) { force += f; }
     void step(float deltatime);
+    void reset();
 };
 
 class Simulation {
    private:
+    using Func = std::function<float(float)>;
     Cart cart;
-    std::function<float(float)> inclinationMap;
-    float getInclinationAt(float x);
+    Func inclination;
 
    public:
-    Simulation();
+    Simulation(Func inclinationFunc) : inclination(inclinationFunc){};
+    void setInclination(Func inclinationFunc) { inclination = inclinationFunc; }
     void step(float deltatime, float cartThrust);
     float getCartPosition() { return cart.getPosition(); }
+    float getInclinationAt(float x);
+    void reset() { cart.reset(); }
 };
