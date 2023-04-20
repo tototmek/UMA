@@ -2,8 +2,6 @@ import engine
 import math
 import pygame
 import time
-from scripts.track_generation import TrackGenerator
-
 
 points = [
     (0, 0),
