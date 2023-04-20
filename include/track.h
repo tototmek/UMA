@@ -25,7 +25,8 @@ class Track {
 
 class TrackGenerator {
    public:
-    static Coeffs calculateSplineCoeffs(Point point1, Point point2);
+    static Splines generateSplines(std::vector<Point>& points);
+    static Coeffs calculateSplineCoeffs(Point& point1, Point& point2);
     static Coeffs findSplineCoeffsAt(float x, Splines splines);
 };
 
