@@ -38,5 +38,5 @@ void Simulation::step(float deltatime, float cartThrust) {
 }
 
 float Simulation::getInclinationAt(float x) {
-    return std::atan(slopeFunction(x));
+    return std::atan(track.slopeAt(x));
 }

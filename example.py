@@ -14,7 +14,7 @@ points = [
 track = Track.through_points(points)
 
 
-simulation = engine.Simulation(track_slope=track.slope)
+simulation = engine.Simulation(track.coeffs)
 
 pygame.init()
 window = pygame.display.set_mode((960, 540))
@@ -22,7 +22,8 @@ scale = 30
 offset_x = 50
 offset_y = 300
 
-(black, grey, white) = ((0, 0, 0), (48, 48, 48),  (255, 255, 255))
+(black, grey, darkgrey, white) = ((0, 0, 0),
+                                  (48, 48, 48), (20, 20, 20), (255, 255, 255))
 
 deltatime = 0.017
 sim_resolution = 5
@@ -41,9 +42,9 @@ def draw_track(track_elevation, length, color=white):
         x += step
 
 
-def draw_axes(color=grey):
-    pygame.draw.line(window, grey, (0, offset_y), (960, offset_y))
-    pygame.draw.line(window, grey, (offset_x, 0), (offset_x, 540))
+def draw_axes(color=darkgrey):
+    pygame.draw.line(window, color, (0, offset_y), (960, offset_y))
+    pygame.draw.line(window, color, (offset_x, 0), (offset_x, 540))
 
 
 # Run the game loop

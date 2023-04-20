@@ -2,6 +2,8 @@
 #include <map>
 #include <vector>
 
+#include "track.h"
+
 class Cart {
    private:
     float position, velocity, force;
@@ -15,12 +17,11 @@ class Cart {
 
 class Simulation {
    private:
-    using Func = std::function<float(float)>;
     Cart cart;
-    Func slopeFunction;
+    Track track;
 
    public:
-    Simulation(Func inclinationFunc) : slopeFunction(inclinationFunc){};
+    Simulation(std::vector<float>& c) : track(c){};
     void step(float deltatime, float cartThrust);
     float getCartPosition() { return cart.getPosition(); }
     float getInclinationAt(float x);
