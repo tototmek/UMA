@@ -6,13 +6,18 @@ from scripts.track_generation import TrackGenerator
 
 
 points = [
-    (0, 1),
-    (4, 0),
-    (7, 4),
-    (10, 0),
-    (14, -1),
-    (20, 2),
-    (30, 2),
+    (0, 0),
+    (3, 2),
+    (6, -4),
+    (9, 4),
+    (12, -2),
+    (15, 3),
+    (18, -2),
+    (21, 6),
+    (24, 3),
+    (27, 5),
+    (30, -3),
+
 ]
 
 
@@ -39,7 +44,7 @@ def draw_circle(x, y):
 
 
 def draw_track(track_elevation, length, color=white):
-    step = 0.1
+    step = 0.2
     x = 0
     while x < length:
         pygame.draw.line(window, color, (x * scale + offset_x, offset_y - track_elevation(x) * scale),
@@ -62,9 +67,9 @@ while running:
     thrust = 0.0
     keys = pygame.key.get_pressed()
     if keys[pygame.K_RIGHT]:
-        thrust = 16.0
+        thrust = 32.0
     if keys[pygame.K_LEFT]:
-        thrust = -16.0
+        thrust = -32.0
     if keys[pygame.K_r]:
         simulation.reset()
 
@@ -75,8 +80,8 @@ while running:
         steps=sim_resolution)
     cart_x = simulation.get_cart_position()
     draw_axes()
-    # draw_track(slope, 100, grey)
-    draw_track(elevation, 30)
+    draw_track(slope, 31, darkgrey)
+    draw_track(elevation, 31)
     draw_circle(cart_x * scale + offset_x, offset_y -
                 elevation(cart_x) * scale)
     pygame.display.update()
