@@ -1,4 +1,5 @@
 import engine
+import math
 import pygame
 import time
 from scripts.track_generation import TrackGenerator
@@ -6,14 +7,14 @@ from scripts.track_generation import TrackGenerator
 
 points = [
     (0, 2),
-    (2, 2),
+    # (2, 2),
     (5, -1),
     (8, -1),
-    (10, 5),
-    (12, 4),
-    (15, 4),
-    (18, 2),
-    (20, 3),
+    # (10, 5),
+    (12, 2),
+    (13, 3),
+    # (18, 2),
+    (30, 3),
 ]
 track_coeffs = TrackGenerator.through_points(points)
 
@@ -24,6 +25,7 @@ elevation = simulation.get_track_elevation()
 
 pygame.init()
 window = pygame.display.set_mode((960, 540))
+pygame.display.set_caption("RViz")
 scale = 30
 offset_x = 50
 offset_y = 300
@@ -76,7 +78,7 @@ while running:
         steps=sim_resolution)
     cart_x = simulation.get_cart_position()
     draw_axes()
-    draw_track(slope, 100, grey)
+    # draw_track(slope, 100, grey)
     draw_track(elevation, 100)
     draw_circle(cart_x * scale + offset_x, offset_y -
                 elevation(cart_x) * scale)

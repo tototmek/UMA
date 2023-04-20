@@ -31,9 +31,6 @@ void Simulation::step(float deltatime, float cartThrust) {
     cart.applyForce(gravityX);
     cart.applyForce(cartThrust);
     cart.step(deltatime);
-    // std::cout << "Inclination: " << inclination
-    //           << "\tcos(Inclination): " << std::cos(inclination)
-    //           << "\tGravityX: " << gravityX << std::endl;
 }
 
 float Simulation::getInclinationAt(float x) {
