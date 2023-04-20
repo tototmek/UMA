@@ -8,7 +8,7 @@ namespace py = pybind11;
 
 PYBIND11_MODULE(engine, m) {
     py::class_<Simulation>(m, "Simulation")
-        .def(py::init<std::vector<float>&>())
+        .def(py::init<std::vector<track::Point>&>())
         .def("step", &Simulation::step, py::arg("deltatime"),
              py::arg("cartThrust"))
         .def(

@@ -6,20 +6,17 @@ from scripts.track_generation import TrackGenerator
 
 
 points = [
-    (0, 2),
-    # (2, 2),
-    (5, -1),
-    (8, -1),
-    # (10, 5),
-    (12, 2),
-    (13, 3),
-    # (18, 2),
-    (30, 3),
+    (0, 1),
+    (4, 0),
+    (7, 4),
+    (10, 0),
+    (14, -1),
+    (20, 2),
+    (30, 2),
 ]
-track_coeffs = TrackGenerator.through_points(points)
 
 
-simulation = engine.Simulation(track_coeffs)
+simulation = engine.Simulation(points)
 slope = simulation.get_track_slope()
 elevation = simulation.get_track_elevation()
 
@@ -79,7 +76,7 @@ while running:
     cart_x = simulation.get_cart_position()
     draw_axes()
     # draw_track(slope, 100, grey)
-    draw_track(elevation, 100)
+    draw_track(elevation, 30)
     draw_circle(cart_x * scale + offset_x, offset_y -
                 elevation(cart_x) * scale)
     pygame.display.update()

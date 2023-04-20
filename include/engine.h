@@ -18,13 +18,13 @@ class Cart {
 class Simulation {
    private:
     Cart cart;
-    Track track;
+    track::Track track;
 
    public:
-    Simulation(std::vector<float>& c) : track(c){};
+    Simulation(std::vector<track::Point>& c) : track(c){};
     void step(float deltatime, float cartThrust);
     float getInclinationAt(float x);
     void reset() { cart.reset(); }
     Cart& getCart() { return cart; }
-    Track& getTrack() { return track; }
+    track::Track& getTrack() { return track; }
 };
