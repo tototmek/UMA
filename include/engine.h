@@ -11,7 +11,7 @@ class Cart {
    public:
     float getPosition() { return position; }
     void applyForce(float f);
-    void step(float deltatime, float inclination);
+    void step(float deltatime);
     void reset();
 };
 
@@ -23,7 +23,8 @@ class Simulation {
    public:
     Simulation(std::vector<float>& c) : track(c){};
     void step(float deltatime, float cartThrust);
-    float getCartPosition() { return cart.getPosition(); }
     float getInclinationAt(float x);
     void reset() { cart.reset(); }
+    Cart& getCart() { return cart; }
+    Track& getTrack() { return track; }
 };

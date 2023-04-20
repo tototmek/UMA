@@ -8,12 +8,11 @@ static const float efficiency = 0.996f;
 
 void Cart::applyForce(float f) { force += f; }
 
-void Cart::step(float deltatime, float inclination) {
+void Cart::step(float deltatime) {
     velocity += force * deltatime;
     velocity *= efficiency;
     force = 0;
-    position += (velocity * deltatime) * std::cos(inclination);
-    (void)inclination;
+    position += (velocity * deltatime);
 }
 
 void Cart::reset() {
@@ -31,7 +30,7 @@ void Simulation::step(float deltatime, float cartThrust) {
     }
     cart.applyForce(gravityX);
     cart.applyForce(cartThrust);
-    cart.step(deltatime, inclination);
+    cart.step(deltatime);
     // std::cout << "Inclination: " << inclination
     //           << "\tcos(Inclination): " << std::cos(inclination)
     //           << "\tGravityX: " << gravityX << std::endl;

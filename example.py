@@ -1,20 +1,26 @@
 import engine
 import pygame
 import time
-from scripts.track import Track
+from scripts.track_generation import TrackGenerator
 
 
 points = [
-    (0, 3),
+    (0, 2),
+    (2, 2),
     (5, -1),
+    (8, -1),
     (10, 5),
+    (12, 4),
     (15, 4),
+    (18, 2),
     (20, 3),
 ]
-track = Track.through_points(points)
+track_coeffs = TrackGenerator.through_points(points)
 
 
-simulation = engine.Simulation(track.coeffs)
+simulation = engine.Simulation(track_coeffs)
+slope = simulation.get_track_slope()
+elevation = simulation.get_track_elevation()
 
 pygame.init()
 window = pygame.display.set_mode((960, 540))
@@ -60,18 +66,20 @@ while running:
         thrust = 16.0
     if keys[pygame.K_LEFT]:
         thrust = -16.0
+    if keys[pygame.K_r]:
+        simulation.reset()
 
     window.fill(black)
     simulation.step_multiple(
         deltatime=deltatime/sim_resolution,
         cartThrust=thrust,
         steps=sim_resolution)
-    cart_x = simulation.getCartPosition()
+    cart_x = simulation.get_cart_position()
     draw_axes()
-    draw_track(track.slope, 100, grey)
-    draw_track(track.elevation, 100)
+    draw_track(slope, 100, grey)
+    draw_track(elevation, 100)
     draw_circle(cart_x * scale + offset_x, offset_y -
-                track.elevation(cart_x) * scale)
+                elevation(cart_x) * scale)
     pygame.display.update()
     time.sleep(deltatime)
 

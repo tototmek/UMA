@@ -1,3 +1,4 @@
+#include <pybind11/functional.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -19,5 +20,11 @@ PYBIND11_MODULE(engine, m) {
                 }
             },
             py::arg("deltatime"), py::arg("cartThrust"), py::arg("steps"))
-        .def("getCartPosition", &Simulation::getCartPosition);
+        .def("reset", &Simulation::reset)
+        .def("get_cart_position",
+             [](Simulation& self) { return self.getCart().getPosition(); })
+        .def("get_track_elevation",
+             [](Simulation& self) { return self.getTrack().getElevationMap(); })
+        .def("get_track_slope",
+             [](Simulation& self) { return self.getTrack().getSlopeMap(); });
 }
