@@ -3,8 +3,8 @@
 #include <cmath>
 #include <iostream>
 
-static const float gravity = 0.5f;
-static const float efficiency = 0.995f;
+static const float gravity = 9.81f;
+static const float efficiency = 0.999f;
 
 void Cart::applyForce(float f) { force += f; }
 
@@ -13,6 +13,7 @@ void Cart::step(float deltatime, float inclination) {
     velocity *= efficiency;
     force = 0;
     position += (velocity * deltatime) * std::cos(inclination);
+    (void)inclination;
 }
 
 void Cart::reset() {
@@ -31,6 +32,11 @@ void Simulation::step(float deltatime, float cartThrust) {
     cart.applyForce(gravityX);
     cart.applyForce(cartThrust);
     cart.step(deltatime, inclination);
+    // std::cout << "Inclination: " << inclination
+    //           << "\tcos(Inclination): " << std::cos(inclination)
+    //           << "\tGravityX: " << gravityX << std::endl;
 }
 
-float Simulation::getInclinationAt(float x) { return inclination(x); }
+float Simulation::getInclinationAt(float x) {
+    return std::atan(slopeFunction(x));
+}

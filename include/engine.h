@@ -17,11 +17,10 @@ class Simulation {
    private:
     using Func = std::function<float(float)>;
     Cart cart;
-    Func inclination;
+    Func slopeFunction;
 
    public:
-    Simulation(Func inclinationFunc) : inclination(inclinationFunc){};
-    void setInclination(Func inclinationFunc) { inclination = inclinationFunc; }
+    Simulation(Func inclinationFunc) : slopeFunction(inclinationFunc){};
     void step(float deltatime, float cartThrust);
     float getCartPosition() { return cart.getPosition(); }
     float getInclinationAt(float x);
