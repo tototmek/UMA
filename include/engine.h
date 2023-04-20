@@ -11,7 +11,7 @@ class Cart {
    public:
     float getPosition() { return position; }
     void applyForce(float f);
-    void step(float deltatime);
+    void step(float deltatime, float inclination);
     void reset();
 };
 
