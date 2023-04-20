@@ -1,29 +1,24 @@
 import engine
 import pygame
 import time
+from scripts.track import Track
 
 
-class Track:
-    def __init__(self, a0, a1, a2, a3):
-        self.a0 = a0
-        self.a1 = a1
-        self.a2 = a2
-        self.a3 = a3
-
-    def elevation(self):
-        return lambda x: self.a0 + self.a1 * x + self.a2 * x**2 + self.a3 * x**3
-
-    def slope(self):
-        return lambda x: self.a1 + 2 * self.a2 * x + 3 * self.a3 * x**2
+points = [
+    (0, 3),
+    (5, -1),
+    (10, 5),
+    (15, 4),
+    (20, 3),
+]
+track = Track.through_points(points)
 
 
-track = Track(15.0, -2.0, 0.05, -0.0004)
-
-simulation = engine.Simulation(track_slope=track.slope())
+simulation = engine.Simulation(track_slope=track.slope)
 
 pygame.init()
 window = pygame.display.set_mode((960, 540))
-scale = 10
+scale = 30
 offset_x = 50
 offset_y = 300
 
@@ -72,10 +67,10 @@ while running:
         steps=sim_resolution)
     cart_x = simulation.getCartPosition()
     draw_axes()
-    draw_track(track.slope(), 100, grey)
-    draw_track(track.elevation(), 100)
+    draw_track(track.slope, 100, grey)
+    draw_track(track.elevation, 100)
     draw_circle(cart_x * scale + offset_x, offset_y -
-                track.elevation()(cart_x) * scale)
+                track.elevation(cart_x) * scale)
     pygame.display.update()
     time.sleep(deltatime)
 

@@ -4,7 +4,7 @@
 #include <iostream>
 
 static const float gravity = 9.81f;
-static const float efficiency = 0.999f;
+static const float efficiency = 0.996f;
 
 void Cart::applyForce(float f) { force += f; }
 
