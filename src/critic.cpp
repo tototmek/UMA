@@ -1,6 +1,7 @@
 #include "critic.h"
 
 using namespace critic;
+using namespace engine;
 
 float Critic::getReward(const Simulation& sim) {
     float result = 0.0f;

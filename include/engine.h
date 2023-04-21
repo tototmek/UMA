@@ -7,6 +7,8 @@
 
 #include "track.h"
 
+namespace engine {
+
 static float gravity = 18.0f;
 static float efficiency = 0.99f;
 
@@ -40,5 +42,7 @@ class Simulation {
     const Cart& getCart() const { return cart; }
     const track::Track& getTrack() const { return track; }
 };
+
+}  // namespace engine
 
 #endif

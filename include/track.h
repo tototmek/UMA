@@ -16,8 +16,8 @@ class Track {
     Func elevationMap;
     Func slopeMap;
 
-    Func generateElevation(Splines c);
-    Func generateSlope(Splines c);
+    Func generateElevation(const Splines& c);
+    Func generateSlope(const Splines& c);
 
    public:
     Track(const std::vector<Point>& points);
@@ -31,7 +31,7 @@ class TrackGenerator {
     static Splines generateSplines(const std::vector<Point>& points);
     static Coeffs calculateSplineCoeffs(const Point& point1,
                                         const Point& point2);
-    static Coeffs findSplineCoeffsAt(float x, Splines splines);
+    static Coeffs findSplineCoeffsAt(float x, const Splines& splines);
 };
 
 }  // namespace track

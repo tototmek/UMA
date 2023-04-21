@@ -39,7 +39,7 @@ critic::Rewards rewardsFromConfig(const EnvironmentConfig& c);
 
 class Environment {
    private:
-    Simulation simulation;
+    engine::Simulation simulation;
     critic::Critic critic;
     const EnvironmentConfig config;
 
@@ -52,7 +52,7 @@ class Environment {
           critic(rewardsFromConfig(c)),
           config(c){};
     StepOutput step(StepInput& in);
-    const Simulation& getSimulation() const { return simulation; };
+    const engine::Simulation& getSimulation() const { return simulation; };
 };
 
 #endif

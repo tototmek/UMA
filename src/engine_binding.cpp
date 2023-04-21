@@ -6,6 +6,7 @@
 #include "engine.h"
 
 namespace py = pybind11;
+using namespace engine;
 
 PYBIND11_MODULE(engine, m) {
     py::class_<Simulation>(m, "Simulation")

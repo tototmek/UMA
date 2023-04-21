@@ -12,7 +12,7 @@ Track::Track(const std::vector<Point>& points) {
     slopeMap = generateSlope(splines);
 }
 
-Func Track::generateElevation(Splines splines) {
+Func Track::generateElevation(const Splines& splines) {
     return [splines](float x) {
         Coeffs coeffs = TrackGenerator::findSplineCoeffsAt(x, splines);
         float result = 0;
@@ -23,7 +23,7 @@ Func Track::generateElevation(Splines splines) {
     };
 }
 
-Func Track::generateSlope(Splines splines) {
+Func Track::generateSlope(const Splines& splines) {
     return [splines](float x) {
         Coeffs coeffs = TrackGenerator::findSplineCoeffsAt(x, splines);
         float result = 0;
@@ -55,7 +55,7 @@ Coeffs TrackGenerator::calculateSplineCoeffs(const Point& point1,
     return {a0, a1, a2, a3};
 }
 
-Coeffs TrackGenerator::findSplineCoeffsAt(float x, Splines splines) {
+Coeffs TrackGenerator::findSplineCoeffsAt(float x, const Splines& splines) {
     if (x < splines[0].first.first) {
         return splines[0].second;
     }

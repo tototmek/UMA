@@ -7,7 +7,7 @@
 
 namespace critic {
 
-using Reward = std::function<float(const Simulation&)>;
+using Reward = std::function<float(const engine::Simulation&)>;
 using Rewards = std::vector<std::pair<Reward, float>>;
 
 class Critic {
@@ -16,7 +16,7 @@ class Critic {
 
    public:
     Critic(Rewards r) : rewards(r){};
-    float getReward(const Simulation& sim);
+    float getReward(const engine::Simulation& sim);
 };
 
 namespace rewards {
