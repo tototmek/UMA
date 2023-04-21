@@ -7,6 +7,9 @@
 
 #include "track.h"
 
+static float gravity = 18.0f;
+static float efficiency = 0.99f;
+
 class Cart {
    private:
     float position, velocity, force;
@@ -25,7 +28,12 @@ class Simulation {
     track::Track track;
 
    public:
-    Simulation(std::vector<track::Point>& c) : track(c){};
+    Simulation(const std::vector<track::Point>& c) : track(c){};
+    Simulation(const std::vector<track::Point>& c, float g, float e)
+        : track(c) {
+        gravity = g;
+        efficiency = e;
+    };
     void step(float deltatime, float cartThrust);
     float getInclinationAt(float x);
     void reset() { cart.reset(); }

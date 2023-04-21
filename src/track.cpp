@@ -5,7 +5,7 @@
 #include <stdexcept>
 using namespace track;
 
-Track::Track(std::vector<Point>& points) {
+Track::Track(const std::vector<Point>& points) {
     Splines splines = TrackGenerator::generateSplines(points);
 
     elevationMap = generateElevation(splines);
@@ -34,9 +34,10 @@ Func Track::generateSlope(Splines splines) {
     };
 }
 
-Coeffs TrackGenerator::calculateSplineCoeffs(Point& point1, Point& point2) {
-    auto [x1, y1] = point1;
-    auto [x2, y2] = point2;
+Coeffs TrackGenerator::calculateSplineCoeffs(const Point& point1,
+                                             const Point& point2) {
+    const auto [x1, y1] = point1;
+    const auto [x2, y2] = point2;
     float a0, a1, a2, a3;
 
     a0 = ((x1 * x1 * x1) * y2 - (x2 * x2 * x2) * y1 +
@@ -71,11 +72,11 @@ Coeffs TrackGenerator::findSplineCoeffsAt(float x, Splines splines) {
     throw std::domain_error("Spline not found. Very weird...");
 }
 
-Splines TrackGenerator::generateSplines(std::vector<Point>& points) {
+Splines TrackGenerator::generateSplines(const std::vector<Point>& points) {
     Splines splines;
     for (size_t i = 1; i < points.size(); ++i) {
-        Coeffs splineCoeffs =
-            TrackGenerator::calculateSplineCoeffs(points[i - 1], points[i]);
+        Coeffs splineCoeffs = TrackGenerator::calculateSplineCoeffs(
+            points.at(i - 1), points.at(i));
 
         std::pair<float, float> splineLimits = {points[i - 1].first,
                                                 points[i].first};

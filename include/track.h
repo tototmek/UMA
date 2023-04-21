@@ -20,7 +20,7 @@ class Track {
     Func generateSlope(Splines c);
 
    public:
-    Track(std::vector<Point>& points);
+    Track(const std::vector<Point>& points);
     float slopeAt(float x) const { return slopeMap(x); }
     const Func& getSlopeMap() const { return slopeMap; }
     const Func& getElevationMap() const { return elevationMap; }
@@ -28,8 +28,9 @@ class Track {
 
 class TrackGenerator {
    public:
-    static Splines generateSplines(std::vector<Point>& points);
-    static Coeffs calculateSplineCoeffs(Point& point1, Point& point2);
+    static Splines generateSplines(const std::vector<Point>& points);
+    static Coeffs calculateSplineCoeffs(const Point& point1,
+                                        const Point& point2);
     static Coeffs findSplineCoeffsAt(float x, Splines splines);
 };
 

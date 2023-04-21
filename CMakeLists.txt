@@ -20,4 +20,5 @@ pybind11_add_module(engine
     src/engine_binding.cpp
     src/engine.cpp
     src/track.cpp
-    src/critic.cpp)
+    src/critic.cpp
+    src/environment.cpp)

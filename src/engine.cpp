@@ -3,9 +3,6 @@
 #include <cmath>
 #include <iostream>
 
-static const float gravity = 18.0f;
-static const float efficiency = 0.99f;
-
 void Cart::applyForce(float f) { force += f; }
 
 void Cart::step(float deltatime, float inclination) {
