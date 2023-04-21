@@ -9,14 +9,14 @@ critic::Rewards rewardsFromConfig(const EnvironmentConfig& c) {
             {makeOverspeedPenalty(c.maxVelocity), c.overspeedPenaltyGain}};
 }
 
-StepOutput Environment::step(StepInput& input) {
+StepOutput Environment::step(const StepInput& input) {
     executeSteps(input);
     return buildOutput();
 }
 
-void Environment::executeSteps(StepInput& in) {
+void Environment::executeSteps(const StepInput& in) {
     for (int i = 0; i < config.simStepsPerStep; ++i) {
-        simulation.step(config.simDeltatime, in.action);
+        simulation.step(config.simDeltatime, in.action * config.cartThrustGain);
     }
 }
 

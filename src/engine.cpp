@@ -7,7 +7,7 @@ using namespace engine;
 
 void Cart::applyForce(float f) { force += f; }
 
-void Cart::step(float deltatime, float inclination) {
+void Cart::step(float deltatime, float inclination, float efficiency) {
     velocity += force * deltatime;
     velocity *= efficiency;
     force = 0;
@@ -26,7 +26,7 @@ void Simulation::step(float deltatime, float cartThrust) {
     float gravityX = gravity * std::sin(-inclination);
     cart.applyForce(gravityX);
     cart.applyForce(cartThrust);
-    cart.step(deltatime, inclination);
+    cart.step(deltatime, inclination, efficiency);
 }
 
 float Simulation::getInclinationAt(float x) {

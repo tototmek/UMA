@@ -8,6 +8,7 @@
 struct EnvironmentConfig {
     std::vector<track::Point> points;
     float trackLength;
+    float cartThrustGain;
     float gravity;
     float efficiency;
     float simDeltatime;
@@ -43,7 +44,7 @@ class Environment {
     critic::Critic critic;
     const EnvironmentConfig config;
 
-    void executeSteps(StepInput& in);
+    void executeSteps(const StepInput& in);
     StepOutput buildOutput();
 
    public:
@@ -51,8 +52,9 @@ class Environment {
         : simulation(c.points, c.gravity, c.efficiency),
           critic(rewardsFromConfig(c)),
           config(c){};
-    StepOutput step(StepInput& in);
+    StepOutput step(const StepInput& in);
     const engine::Simulation& getSimulation() const { return simulation; };
+    void reset() { simulation.reset(); };
 };
 
 #endif

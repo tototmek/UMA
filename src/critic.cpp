@@ -17,6 +17,11 @@ Reward rewards::makePositionReward() {
         static float prevPosition = 0.0f;
         float currentPosition = sim.getCart().getPosition();
         float reward = currentPosition - prevPosition;
+        if (reward <
+            -6.9'420) {  // this is needed in case the simulation resets
+            prevPosition = 0.0f;  // trust me...
+            return 0.0f;          // I know it's ugly, sorry
+        }
         prevPosition = currentPosition;
         return reward;
     };

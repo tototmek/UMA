@@ -9,9 +9,6 @@
 
 namespace engine {
 
-static float gravity = 18.0f;
-static float efficiency = 0.99f;
-
 class Cart {
    private:
     float position, velocity, force;
@@ -20,7 +17,7 @@ class Cart {
     float getPosition() const { return position; }
     float getVelocity() const { return velocity; }
     void applyForce(float f);
-    void step(float deltatime, float inclination);
+    void step(float deltatime, float inclination, float efficiency);
     void reset();
 };
 
@@ -28,9 +25,10 @@ class Simulation {
    private:
     Cart cart;
     track::Track track;
+    float gravity;
+    float efficiency;
 
    public:
-    Simulation(const std::vector<track::Point>& c) : track(c){};
     Simulation(const std::vector<track::Point>& c, float g, float e)
         : track(c) {
         gravity = g;

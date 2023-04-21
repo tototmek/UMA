@@ -18,10 +18,28 @@ points = [
 
 ]
 
+config = engine.EnvironmentConfig()
+config.points = points
+config.trackLength = 24
+config.cartThrustGain = 16.0
+config.gravity = 9.81
+config.efficiency = 0.995
+config.simDeltatime = 0.005
+config.simStepsPerStep = 6
+config.inclinationLookAheadDistance = 3.0
+config.positionRewardGain = 1.0
+config.velocityRewardGain = 0.0
+config.timePenaltyGain = 0.1
+config.reversingPenaltyGain = 0.0
+config.overspeedPenaltyGain = 0.0
+config.finishRewardGain = 42.0
+config.targetVelocity = 1.0
+config.maxVelocity = 10.0
 
-simulation = engine.Simulation(points)
-slope = simulation.get_track_slope()
-elevation = simulation.get_track_elevation()
+environment = engine.Environment(config)
+
+slope = environment.get_track_slope()
+elevation = environment.get_track_elevation()
 
 pygame.init()
 window = pygame.display.set_mode((960, 540))
@@ -34,7 +52,6 @@ offset_y = 300
                                   (48, 48, 48), (20, 20, 20), (255, 255, 255))
 
 deltatime = 0.017
-sim_resolution = 5
 
 
 def draw_circle(x, y):
@@ -65,18 +82,16 @@ while running:
     thrust = 0.0
     keys = pygame.key.get_pressed()
     if keys[pygame.K_RIGHT]:
-        thrust = 32.0
+        thrust = 1.0
     if keys[pygame.K_LEFT]:
-        thrust = -32.0
+        thrust = -1.0
     if keys[pygame.K_r]:
-        simulation.reset()
+        environment.reset()
 
     window.fill(black)
-    simulation.step_multiple(
-        deltatime=deltatime/sim_resolution,
-        cartThrust=thrust,
-        steps=sim_resolution)
-    cart_x = simulation.get_cart_position()
+    _, _, _, reward, _ = environment.step(thrust)
+    print(f"\rReward: {reward}          ", end="")
+    cart_x = environment.get_cart_position()
     draw_axes()
     draw_track(slope, 31, darkgrey)
     draw_track(elevation, 31)
