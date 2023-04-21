@@ -1,4 +1,4 @@
-import engine
+from environment import EnvironmentConfig, Environment
 import math
 import pygame
 import time
@@ -18,7 +18,7 @@ points = [
 
 ]
 
-config = engine.EnvironmentConfig()
+config = EnvironmentConfig()
 config.points = points
 config.trackLength = 24
 config.cartThrustGain = 16.0
@@ -26,7 +26,7 @@ config.gravity = 9.81
 config.efficiency = 0.995
 config.simDeltatime = 0.005
 config.simStepsPerStep = 6
-config.inclinationLookAheadDistance = 3.0
+config.inclinationLookAheadDistance = 1.0
 config.positionRewardGain = 1.0
 config.velocityRewardGain = 0.0
 config.timePenaltyGain = 0.1
@@ -36,7 +36,7 @@ config.finishRewardGain = 42.0
 config.targetVelocity = 1.0
 config.maxVelocity = 10.0
 
-environment = engine.Environment(config)
+environment = Environment(config)
 
 slope = environment.get_track_slope()
 elevation = environment.get_track_elevation()
@@ -54,8 +54,13 @@ offset_y = 300
 deltatime = 0.017
 
 
-def draw_circle(x, y):
-    pygame.draw.circle(window, white, (x, y), 5)
+def draw_circle_at(x, y, color=white):
+    pygame.draw.circle(window, color, (x, y), 5)
+
+
+def draw_circle(position, elevation_map, color=white):
+    draw_circle_at(position * scale + offset_x, offset_y -
+                   elevation_map(position) * scale, color)
 
 
 def draw_track(track_elevation, length, color=white):
@@ -72,7 +77,6 @@ def draw_axes(color=darkgrey):
     pygame.draw.line(window, color, (offset_x, 0), (offset_x, 540))
 
 
-# Run the game loop
 running = True
 while running:
     for event in pygame.event.get():
@@ -88,17 +92,19 @@ while running:
     if keys[pygame.K_r]:
         environment.reset()
 
-    window.fill(black)
-    _, _, _, reward, _ = environment.step(thrust)
-    print(f"\rReward: {reward}          ", end="")
+    velocity, inclination, inclination_ahead, reward, is_terminal = environment.step(
+        thrust)
     cart_x = environment.get_cart_position()
+    print(f"Position: {cart_x:>6.2f}\tVelocity: {velocity:>6.2f}\tInclination: {inclination:>6.2f}\tInc.Ahead: {inclination_ahead:>6.2f}\tReward: {reward:>6.2f}\tisTerminal: {is_terminal}")
+
+    window.fill(black)
     draw_axes()
     draw_track(slope, 31, darkgrey)
+    lookahead_position = cart_x + config.inclinationLookAheadDistance
+    draw_circle(lookahead_position, elevation, grey)
     draw_track(elevation, 31)
-    draw_circle(cart_x * scale + offset_x, offset_y -
-                elevation(cart_x) * scale)
+    draw_circle(cart_x, elevation)
     pygame.display.update()
     time.sleep(deltatime)
 
-# Quit pygame
 pygame.quit()

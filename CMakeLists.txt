@@ -16,8 +16,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ../)
 
 include_directories(include)
 
-pybind11_add_module(engine 
-    src/engine_binding.cpp
+pybind11_add_module(environment 
+    src/environment_binding.cpp
     src/engine.cpp
     src/track.cpp
     src/critic.cpp
