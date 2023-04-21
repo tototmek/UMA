@@ -1,3 +1,6 @@
+#pragma once
+#ifndef ENGINE_H
+#define ENGINE_H
 #include <functional>
 #include <map>
 #include <vector>
@@ -9,7 +12,8 @@ class Cart {
     float position, velocity, force;
 
    public:
-    float getPosition() { return position; }
+    float getPosition() const { return position; }
+    float getVelocity() const { return velocity; }
     void applyForce(float f);
     void step(float deltatime, float inclination);
     void reset();
@@ -25,6 +29,8 @@ class Simulation {
     void step(float deltatime, float cartThrust);
     float getInclinationAt(float x);
     void reset() { cart.reset(); }
-    Cart& getCart() { return cart; }
-    track::Track& getTrack() { return track; }
+    const Cart& getCart() const { return cart; }
+    const track::Track& getTrack() const { return track; }
 };
+
+#endif

@@ -1,3 +1,6 @@
+#pragma once
+#ifndef TRACK_H
+#define TRACK_H
 #include <functional>
 #include <vector>
 
@@ -18,9 +21,9 @@ class Track {
 
    public:
     Track(std::vector<Point>& points);
-    float slopeAt(float x) { return slopeMap(x); }
-    Func& getSlopeMap() { return slopeMap; }
-    Func& getElevationMap() { return elevationMap; }
+    float slopeAt(float x) const { return slopeMap(x); }
+    const Func& getSlopeMap() const { return slopeMap; }
+    const Func& getElevationMap() const { return elevationMap; }
 };
 
 class TrackGenerator {
@@ -31,3 +34,5 @@ class TrackGenerator {
 };
 
 }  // namespace track
+
+#endif
