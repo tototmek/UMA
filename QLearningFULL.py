@@ -1,6 +1,5 @@
 from environment import EnvironmentConfig, Environment
 import math
-import pygame
 import time
 import numpy as np
 from scripts.QL import QLearningAlgorythm
@@ -19,7 +18,7 @@ Dodatkowe elementy algorytmu uczącego:
 """
 
 
-def learning(maxIter, algorithm):
+def data_run(maxIter, algorithm, is_testing=False):
     data = []
     running = True
     environment.reset()
@@ -45,8 +44,9 @@ def learning(maxIter, algorithm):
         new_state = [round(velocity), round(inclination), round(inclination_ahead)]
         algorithm.make_Q(new_state)
 
-        algorithm.default_learning(new_state, is_terminal, old_state, action, round(reward, 1))
-        old_state = new_state
+        if is_testing:
+            algorithm.default_learning(new_state, is_terminal, old_state, action, round(reward, 1))
+            old_state = new_state
 
         if is_terminal:
             reached += 1
@@ -61,51 +61,10 @@ def learning(maxIter, algorithm):
             print(f"Target reached in {diff} iterations")
             if iter > maxIter:
                 running = False
-                print("Learning completed")
-        iter += 1
-    return reached, data
-
-
-def testing(maxIter, algorithm):
-    data = []
-    running = True
-    environment.reset()
-    iter = 1
-    reached = 0
-    last_reached = 0
-
-    velocity, inclination, inclination_ahead, reward, is_terminal = environment.step(0)
-    start_state = [round(velocity), round(inclination), round(inclination_ahead)]
-    old_state = start_state
-    algorithm.make_Q(old_state)
-
-    while running:
-        action = algorithm.make_move(old_state)
-        if action == 1:
-            thrust = 1.0
-        elif action == 0:
-            thrust = 0.0
-        else:
-            thrust = -1.0
-
-        velocity, inclination, inclination_ahead, reward, is_terminal = environment.step(thrust)
-        new_state = [round(velocity), round(inclination), round(inclination_ahead)]
-        algorithm.make_Q(new_state)
-
-        if is_terminal:
-            reached += 1
-            diff = iter-last_reached
-            data.append(diff)
-
-            last_reached = iter
-
-            environment.reset()
-            old_state = start_state
-
-            print(f"Target reached in {diff} iterations")
-            if iter > maxIter:
-                running = False
-                print("Testing completed")
+                if is_testing:
+                    print("Learning complied")
+                else:
+                    print("Testing complied")
         iter += 1
     return reached, data
 
@@ -153,14 +112,17 @@ if __name__ == "__main__":
     elevation = environment.get_track_elevation()
 
     q = QLearningAlgorythm([-1, 0, 1], 0.9, 0.9, 0.25)
-    l_reached, l_data = learning(100000, q)
-    t_reached, t_data = testing(10000, q)
+    l_reached, l_data = data_run(100000, q, is_testing=True)
+    print(f'{25 * "#"}')
+    t_reached, t_data = data_run(10000, q)
+    print(f'{25*"#"}')
     print("Learning data:")
     print(f"Reached targets: {l_reached}")
     print(f"Best time: {min(l_data)}")
     print(f"Worst time: {max(l_data)}")
     print(f"Avg time: {np.average(l_data)}")
     print(f"Std: {np.std(l_data)}")
+    print(f'{25 * "#"}')
     print("Testing data:")
     print(f"Reached targets: {t_reached}")
     print(f"Best time: {min(t_data)}")
