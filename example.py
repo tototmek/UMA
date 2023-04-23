@@ -76,8 +76,9 @@ def draw_axes(color=darkgrey):
     pygame.draw.line(window, color, (0, offset_y), (960, offset_y))
     pygame.draw.line(window, color, (offset_x, 0), (offset_x, 540))
 
-
+i = 1
 running = True
+environment.reset()
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -96,7 +97,10 @@ while running:
         thrust)
     cart_x = environment.get_cart_position()
     print(f"Position: {cart_x:>6.2f}\tVelocity: {velocity:>6.2f}\tInclination: {inclination:>6.2f}\tInc.Ahead: {inclination_ahead:>6.2f}\tReward: {reward:>6.2f}\tisTerminal: {is_terminal}")
-
+    i += 1
+    if is_terminal:
+        print(i)
+        running = False
     window.fill(black)
     draw_axes()
     draw_track(slope, 31, darkgrey)

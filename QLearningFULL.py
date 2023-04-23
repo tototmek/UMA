@@ -1,0 +1,169 @@
+from environment import EnvironmentConfig, Environment
+import math
+import pygame
+import time
+import numpy as np
+from scripts.QL import QLearningAlgorythm
+
+
+"""
+Założenia:
+Algorytm ma 100k iteracji na naukę
+potem ma 10K iteracji testujących
+Kryterium porównawcze:
+Liczność osiągnieć celu podczas testów
+Ograniczenia:
+maksymalna prędkość 10 - powyżej 10 stan terminalny
+Dodatkowe elementy algorytmu uczącego:
+
+"""
+
+
+def learning(maxIter, algorithm):
+    data = []
+    running = True
+    environment.reset()
+    iter = 1
+    reached = 0
+    last_reached = 0
+
+    velocity, inclination, inclination_ahead, reward, is_terminal = environment.step(0)
+    start_state = [round(velocity), round(inclination), round(inclination_ahead)]
+    old_state = start_state
+    algorithm.make_Q(old_state)
+
+    while running:
+        action = algorithm.make_move(old_state)
+        if action == 1:
+            thrust = 1.0
+        elif action == 0:
+            thrust = 0.0
+        else:
+            thrust = -1.0
+
+        velocity, inclination, inclination_ahead, reward, is_terminal = environment.step(thrust)
+        new_state = [round(velocity), round(inclination), round(inclination_ahead)]
+        algorithm.make_Q(new_state)
+
+        algorithm.default_learning(new_state, is_terminal, old_state, action, round(reward, 1))
+        old_state = new_state
+
+        if is_terminal:
+            reached += 1
+            diff = iter-last_reached
+            data.append(diff)
+
+            last_reached = iter
+
+            environment.reset()
+            old_state = start_state
+
+            print(f"Target reached in {diff} iterations")
+            if iter > maxIter:
+                running = False
+                print("Learning completed")
+        iter += 1
+    return reached, data
+
+
+def testing(maxIter, algorithm):
+    data = []
+    running = True
+    environment.reset()
+    iter = 1
+    reached = 0
+    last_reached = 0
+
+    velocity, inclination, inclination_ahead, reward, is_terminal = environment.step(0)
+    start_state = [round(velocity), round(inclination), round(inclination_ahead)]
+    old_state = start_state
+    algorithm.make_Q(old_state)
+
+    while running:
+        action = algorithm.make_move(old_state)
+        if action == 1:
+            thrust = 1.0
+        elif action == 0:
+            thrust = 0.0
+        else:
+            thrust = -1.0
+
+        velocity, inclination, inclination_ahead, reward, is_terminal = environment.step(thrust)
+        new_state = [round(velocity), round(inclination), round(inclination_ahead)]
+        algorithm.make_Q(new_state)
+
+        if is_terminal:
+            reached += 1
+            diff = iter-last_reached
+            data.append(diff)
+
+            last_reached = iter
+
+            environment.reset()
+            old_state = start_state
+
+            print(f"Target reached in {diff} iterations")
+            if iter > maxIter:
+                running = False
+                print("Testing completed")
+        iter += 1
+    return reached, data
+
+
+if __name__ == "__main__":
+    points = [
+        (0, 0),
+        (3, 2),
+        (6, -4),
+        (9, 4),
+        (12, -2),
+        (15, 3),
+        (18, -2),
+        (21, 6),
+        (24, 3),
+        (27, 5),
+        (30, -3),
+
+    ]
+
+    config = EnvironmentConfig()
+    config.points = points
+    config.trackLength = 24
+    config.cartThrustGain = 16.0
+    config.gravity = 9.81
+    config.efficiency = 0.995
+
+    config.simDeltatime = 0.005
+    config.simStepsPerStep = 6
+    config.inclinationLookAheadDistance = 1.0
+
+    config.positionRewardGain = 1.0
+    config.velocityRewardGain = 0.0
+    config.timePenaltyGain = 0.1
+    config.reversingPenaltyGain = 0.0
+    config.overspeedPenaltyGain = 0.0
+    config.finishRewardGain = 42.0
+
+    config.targetVelocity = 9.0
+    config.maxVelocity = 10.0
+
+    environment = Environment(config)
+
+    slope = environment.get_track_slope()
+    elevation = environment.get_track_elevation()
+
+    q = QLearningAlgorythm([-1, 0, 1], 0.9, 0.9, 0.25)
+    l_reached, l_data = learning(100000, q)
+    t_reached, t_data = testing(10000, q)
+    print("Learning data:")
+    print(f"Reached targets: {l_reached}")
+    print(f"Best time: {min(l_data)}")
+    print(f"Worst time: {max(l_data)}")
+    print(f"Avg time: {np.average(l_data)}")
+    print(f"Std: {np.std(l_data)}")
+    print("Testing data:")
+    print(f"Reached targets: {t_reached}")
+    print(f"Best time: {min(t_data)}")
+    print(f"Worst time: {max(t_data)}")
+    print(f"Avg time: {np.average(t_data)}")
+    print(f"Std: {np.std(t_data)}")
