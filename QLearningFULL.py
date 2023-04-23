@@ -19,6 +19,7 @@ Dodatkowe elementy algorytmu uczącego:
 
 
 def data_run(maxIter, algorithm, is_testing=False):
+    start_time = time.time()
     data = []
     running = True
     environment.reset()
@@ -66,6 +67,7 @@ def data_run(maxIter, algorithm, is_testing=False):
                 else:
                     print("Testing complied")
         iter += 1
+    print(f'Time: {round(time.time() - start_time, 2)}[s]')
     return reached, data
 
 
