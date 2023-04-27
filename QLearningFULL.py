@@ -70,49 +70,50 @@ def data_run(maxIter, algorithm, is_testing=False):
     print(f'Time: {round(time.time() - start_time, 2)}[s]')
     return reached, data
 
+points = [
+    (0, 0),
+    (3, 2),
+    (6, -4),
+    (9, 4),
+    (12, -2),
+    (15, 3),
+    (18, -2),
+    (21, 6),
+    (24, 3),
+    (27, 5),
+    (30, -3),
 
+]
+
+config = EnvironmentConfig()
+config.points = points
+config.trackLength = 24
+config.cartThrustGain = 16.0
+config.gravity = 9.81
+config.efficiency = 0.995
+
+config.simDeltatime = 0.005
+config.simStepsPerStep = 6
+config.inclinationLookAheadDistance = 1.0
+
+config.positionRewardGain = 1.0
+config.velocityRewardGain = 0.0
+config.timePenaltyGain = 0.1
+config.reversingPenaltyGain = 0.0
+config.overspeedPenaltyGain = 0.0
+config.finishRewardGain = 42.0
+
+config.targetVelocity = 9.0
+config.maxVelocity = 10.0
+
+environment = Environment(config)
+
+slope = environment.get_track_slope()
+elevation = environment.get_track_elevation()
+
+lines = []
+lines.append(f'Gamma, Beta, Epsilon, Reached, Best, Worst, Average, Std\n')
 if __name__ == "__main__":
-    points = [
-        (0, 0),
-        (3, 2),
-        (6, -4),
-        (9, 4),
-        (12, -2),
-        (15, 3),
-        (18, -2),
-        (21, 6),
-        (24, 3),
-        (27, 5),
-        (30, -3),
-
-    ]
-
-    config = EnvironmentConfig()
-    config.points = points
-    config.trackLength = 24
-    config.cartThrustGain = 16.0
-    config.gravity = 9.81
-    config.efficiency = 0.995
-
-    config.simDeltatime = 0.005
-    config.simStepsPerStep = 6
-    config.inclinationLookAheadDistance = 1.0
-
-    config.positionRewardGain = 1.0
-    config.velocityRewardGain = 0.0
-    config.timePenaltyGain = 0.1
-    config.reversingPenaltyGain = 0.0
-    config.overspeedPenaltyGain = 0.0
-    config.finishRewardGain = 42.0
-
-    config.targetVelocity = 9.0
-    config.maxVelocity = 10.0
-
-    environment = Environment(config)
-
-    slope = environment.get_track_slope()
-    elevation = environment.get_track_elevation()
-
     q = QLearningAlgorythm([-1, 0, 1], 0.9, 0.9, 0.25)
     l_reached, l_data = data_run(100000, q, is_testing=True)
     print(f'{25 * "#"}')
@@ -125,9 +126,17 @@ if __name__ == "__main__":
     print(f"Avg time: {np.average(l_data)}")
     print(f"Std: {np.std(l_data)}")
     print(f'{25 * "#"}')
+    t_min = min(t_data)
+    t_max = max(t_data)
+    t_avg = np.average(t_data)
+    t_std = np.std(t_data)
     print("Testing data:")
     print(f"Reached targets: {t_reached}")
-    print(f"Best time: {min(t_data)}")
-    print(f"Worst time: {max(t_data)}")
-    print(f"Avg time: {np.average(t_data)}")
-    print(f"Std: {np.std(t_data)}")
+    print(f"Best time: {t_min}")
+    print(f"Worst time: {t_max}")
+    print(f"Avg time: {t_avg}")
+    print(f"Std: {t_std}")
+    lines.append(f'{q.gamma}, {q.beta}, {q.epsilon}, {t_reached}, {t_reached}, {t_min}, {t_max}, {t_avg}, {t_std}\n')
+    with open('out/QLdata.csv', 'w') as f:
+        for line in lines:
+            f.write(line)
