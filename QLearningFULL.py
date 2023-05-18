@@ -18,7 +18,7 @@ Dodatkowe elementy algorytmu uczącego:
 """
 
 
-def data_run(maxIter, algorithm, is_testing=False):
+def data_run(maxIter, algorithm, is_learning=False):
     start_time = time.time()
     data = []
     running = True
@@ -45,7 +45,7 @@ def data_run(maxIter, algorithm, is_testing=False):
         new_state = [round(velocity), round(inclination), round(inclination_ahead)]
         algorithm.make_Q(new_state)
 
-        if is_testing:
+        if is_learning:
             algorithm.default_learning(new_state, is_terminal, old_state, action, round(reward, 1))
             old_state = new_state
 
@@ -62,28 +62,32 @@ def data_run(maxIter, algorithm, is_testing=False):
             print(f"Target reached in {diff} iterations")
             if iter > maxIter:
                 running = False
-                if is_testing:
-                    print("Learning complied")
+                if is_learning:
+                    print("Learning completed")
                 else:
-                    print("Testing complied")
+                    print("Testing completed")
+        if iter > maxIter:
+            running = False
         iter += 1
     print(f'Time: {round(time.time() - start_time, 2)}[s]')
     return reached, data
 
-points = [
-    (0, 0),
-    (3, 2),
-    (6, -4),
-    (9, 4),
-    (12, -2),
-    (15, 3),
-    (18, -2),
-    (21, 6),
-    (24, 3),
-    (27, 5),
-    (30, -3),
+points = [(0, 0), (3, 2), (6, -4), (9, 4), (12, -2), (15, 3), (18, -2), (21, 6), (24, 3), (27, 5), (30, -3)]
 
-]
+"""
+2 metoda uczenia w QL
+
+200k iter na uczenie
+co 50k zmiana mapy
+
+V > Vmax -> stan terminalny i zdycha -> dałbym 10
+
+beta, gamma, epsilon, strategie wyboru akcji, modyfikacja nagród
+poszukiwanie najlepszego agenta
+
+dodać do danych średnią predkość
+"""
+
 
 config = EnvironmentConfig()
 config.points = points
@@ -115,7 +119,7 @@ lines = []
 lines.append(f'Gamma, Beta, Epsilon, Reached, Best, Worst, Average, Std\n')
 if __name__ == "__main__":
     q = QLearningAlgorythm([-1, 0, 1], 0.9, 0.9, 0.25)
-    l_reached, l_data = data_run(100000, q, is_testing=True)
+    l_reached, l_data = data_run(100000, q, is_learning=True)
     print(f'{25 * "#"}')
     t_reached, t_data = data_run(10000, q)
     print(f'{25*"#"}')
@@ -136,7 +140,7 @@ if __name__ == "__main__":
     print(f"Worst time: {t_max}")
     print(f"Avg time: {t_avg}")
     print(f"Std: {t_std}")
-    lines.append(f'{q.gamma}, {q.beta}, {q.epsilon}, {t_reached}, {t_reached}, {t_min}, {t_max}, {t_avg}, {t_std}\n')
+    lines.append(f'{q.gamma}, {q.beta}, {q.epsilon}, {t_reached}, {t_min}, {t_max}, {t_avg}, {t_std}\n')
     with open('out/QLdata.csv', 'w') as f:
         for line in lines:
             f.write(line)
