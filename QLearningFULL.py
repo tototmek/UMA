@@ -18,61 +18,118 @@ Dodatkowe elementy algorytmu uczącego:
 """
 
 
-def data_run(maxIter, algorithm, is_learning=False):
-    start_time = time.time()
-    data = []
-    running = True
-    environment.reset()
-    iter = 1
-    reached = 0
-    last_reached = 0
+def run_epoch(env, qlearning, max_iterations):
+    iteration = 0
+    total_reward = 0
+    env.reset()
 
-    velocity, inclination, inclination_ahead, reward, is_terminal = environment.step(0)
-    start_state = [round(velocity), round(inclination), round(inclination_ahead)]
+    velocity, inclination, inclination_ahead, _, _ = env.step(0)
+    start_state = [
+        round(velocity),
+        round(inclination),
+        round(inclination_ahead)
+    ]
     old_state = start_state
-    algorithm.make_Q(old_state)
+    qlearning.make_Q(old_state)
 
-    while running:
-        action = algorithm.make_move(old_state)
-        if action == 1:
-            thrust = 1.0
-        elif action == 0:
-            thrust = 0.0
-        else:
-            thrust = -1.0
+    while True:
+        action = qlearning.make_move(old_state)
 
-        velocity, inclination, inclination_ahead, reward, is_terminal = environment.step(thrust)
-        new_state = [round(velocity), round(inclination), round(inclination_ahead)]
-        algorithm.make_Q(new_state)
+        velocity, inclination, inclination_ahead, reward, is_terminal = env.step(
+            action)
+        total_reward += reward
 
-        if is_learning:
-            algorithm.default_learning(new_state, is_terminal, old_state, action, round(reward, 1))
-            old_state = new_state
+        new_state = [round(velocity), round(inclination),
+                     round(inclination_ahead)]
+        qlearning.make_Q(new_state)
 
+        qlearning.default_learning(
+            new_state, is_terminal, old_state, action, round(reward, 1))
+        old_state = new_state
+
+        iteration += 1
         if is_terminal:
-            reached += 1
-            diff = iter-last_reached
-            data.append(diff)
+            print(
+                f"Reward: {total_reward:.1f},\tTarget reached in {iteration} iterations.")
+            return True, iteration, total_reward
+        if iteration > max_iterations:
+            print(
+                f"Reward: {total_reward:.1f},\tIteration limit. Target not reached")
+            return False, iteration, total_reward
 
-            last_reached = iter
 
-            environment.reset()
-            old_state = start_state
+def run_test(env, qlearning, max_iterations):
+    iteration = 0
+    total_reward = 0
+    env.reset()
+    velocity, inclination, inclination_ahead, _, _ = env.step(0)
+    state = [round(velocity), round(inclination),
+             round(inclination_ahead)]
 
-            print(f"Target reached in {diff} iterations")
-            if iter > maxIter:
-                running = False
-                if is_learning:
-                    print("Learning completed")
-                else:
-                    print("Testing completed")
-        if iter > maxIter:
-            running = False
-        iter += 1
+    while True:
+        action = qlearning.make_move_optimal(state)
+
+        velocity, inclination, inclination_ahead, reward, is_terminal = env.step(
+            action)
+        total_reward += reward
+
+        state = [round(velocity), round(inclination),
+                 round(inclination_ahead)]
+
+        iteration += 1
+        if is_terminal:
+            print(
+                f"Reward: {total_reward:.1f},\tTest success: {iteration} iterations.")
+            return True, iteration, total_reward
+        if iteration > max_iterations:
+            print(f"Reward: {total_reward:.1f},\tIteration limit. Test failed")
+            return False, iteration, total_reward
+
+
+def learn(epochs, env, qlearning):
+    start_time = time.time()
+    iteration_counts = []
+    rewards = []
+    success_count = 0
+    epoch_max_iterations = 5000
+
+    for i in range(epochs):
+        print(f"Epoch {i}:\t", end="")
+        succeeded, iterations, reward = run_epoch(
+            env, qlearning, epoch_max_iterations)
+        iteration_counts.append(iterations)
+        rewards.append(reward)
+        if succeeded:
+            success_count += 1
+
+    print("Learning finished")
     print(f'Time: {round(time.time() - start_time, 2)}[s]')
-    return reached, data
+    return success_count, iteration_counts, rewards
 
-points = [(0, 0), (3, 2), (6, -4), (9, 4), (12, -2), (15, 3), (18, -2), (21, 6), (24, 3), (27, 5), (30, -3)]
+
+def test(epochs, env, qlearning):
+    start_time = time.time()
+    iteration_counts = []
+    rewards = []
+    success_count = 0
+    epoch_max_iterations = 5000
+
+    for i in range(epochs):
+        print(f"Test {i}:\t", end="")
+        succeeded, iterations, reward = run_test(
+            env, qlearning, epoch_max_iterations)
+        iteration_counts.append(iterations)
+        rewards.append(reward)
+        if succeeded:
+            success_count += 1
+
+    print("Learning finished")
+    print(f'Time: {round(time.time() - start_time, 2)}[s]')
+    return success_count, iteration_counts, rewards
+
+
+points = [(0, 0), (3, 2), (6, -4), (9, 4), (12, -2), (15, 3),
+          (18, -2), (21, 6), (24, 3), (27, 5), (30, -3)]
 
 """
 2 metoda uczenia w QL
@@ -91,7 +148,7 @@ dodać do danych średnią predkość
 
 config = EnvironmentConfig()
 config.points = points
-config.trackLength = 24
+config.trackLength = 30
 config.cartThrustGain = 16.0
 config.gravity = 9.81
 config.efficiency = 0.995
@@ -118,17 +175,18 @@ elevation = environment.get_track_elevation()
 lines = []
 lines.append(f'Gamma, Beta, Epsilon, Reached, Best, Worst, Average, Std\n')
 if __name__ == "__main__":
-    q = QLearningAlgorythm([-1, 0, 1], 0.9, 0.9, 0.25)
-    l_reached, l_data = data_run(100000, q, is_learning=True)
+    q = QLearningAlgorythm([-1, 0, 1], 0.9, 0.9, 0.2)
+    l_reached, l_data, l_reward = learn(1000, environment, q)
     print(f'{25 * "#"}')
-    t_reached, t_data = data_run(10000, q)
+    t_reached, t_data, t_reward = test(1, environment, q)
     print(f'{25*"#"}')
     print("Learning data:")
-    print(f"Reached targets: {l_reached}")
-    print(f"Best time: {min(l_data)}")
-    print(f"Worst time: {max(l_data)}")
+    print(f"Reached targets:\t{l_reached}")
+    print(f"Best time:\t{min(l_data)}")
+    # print(f"Worst time: {max(l_data)}")
     print(f"Avg time: {np.average(l_data)}")
-    print(f"Std: {np.std(l_data)}")
+    # print(f"Std: {np.std(l_data)}")
+    print(f"Best reward:\t{max(l_reward)}")
     print(f'{25 * "#"}')
     t_min = min(t_data)
     t_max = max(t_data)
@@ -137,10 +195,12 @@ if __name__ == "__main__":
     print("Testing data:")
     print(f"Reached targets: {t_reached}")
     print(f"Best time: {t_min}")
-    print(f"Worst time: {t_max}")
-    print(f"Avg time: {t_avg}")
-    print(f"Std: {t_std}")
-    lines.append(f'{q.gamma}, {q.beta}, {q.epsilon}, {t_reached}, {t_min}, {t_max}, {t_avg}, {t_std}\n')
-    with open('out/QLdata.csv', 'w') as f:
-        for line in lines:
-            f.write(line)
+    # print(f"Worst time: {t_max}")
+    # print(f"Avg time: {t_avg}")
+    # print(f"Std: {t_std}")
+    print(f"Best reward:\t{max(t_reward)}")
+    # lines.append(
+    # f'{q.gamma}, {q.beta}, {q.epsilon}, {t_reached}, {t_min}, {t_max}, {t_avg}, {t_std}\n')
+    # with open('out/QLdata.csv', 'w') as f:
+    # for line in lines:
+    # f.write(line)

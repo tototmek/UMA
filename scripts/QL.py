@@ -43,12 +43,15 @@ class QLearningAlgorythm:
             return
 
     def make_move(self, state):
-        q = self.Q[state[0]][state[1]][state[2]]
         if self.epsilon > 0:
             random_int = random.randint(0, 100)
             if random_int < self.epsilon:
                 action = random.choice(self.possible_moves)
                 return action
+        return self.make_move_optimal(state)
+
+    def make_move_optimal(self, state):
+        q = self.Q[state[0]][state[1]][state[2]]
         best_action = [[], -math.inf]
         for action in q.keys():
             value = q[action]
@@ -58,7 +61,8 @@ class QLearningAlgorythm:
                 best_action[1] = value
             elif value == best_action[1]:
                 best_action[0].append(action)
-        action = random.choice(best_action[0]) if len(best_action[0]) > 1 else best_action[0][0]
+        action = random.choice(best_action[0]) if len(
+            best_action[0]) > 1 else best_action[0][0]
         return action
 
     def default_learning(self, next_state, is_terminated, state, action, reward):
@@ -66,11 +70,13 @@ class QLearningAlgorythm:
         q_new_state = self.Q[next_state[0]][next_state[1]][next_state[2]]
         new_keys = list(q_new_state.keys())
         old_keys = q_old_state.keys()
-        next_state_values = max([q_new_state[u] for u in new_keys]) if not is_terminated else 0
+        next_state_values = max([q_new_state[u]
+                                 for u in new_keys]) if not is_terminated else 0
 
         if action in old_keys:
             self.Q[state[0]][state[1]][state[2]][action] += \
-                self.beta * (reward + self.gamma * next_state_values - q_old_state[action])
+                self.beta * (reward + self.gamma *
+                             next_state_values - q_old_state[action])
 
     def save_Q(self, file_name="sample.json"):
         json_object = json.dumps(self.Q, indent=4)
