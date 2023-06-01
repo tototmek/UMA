@@ -51,18 +51,23 @@ class QLearningAlgorythm:
         return self.make_move_optimal(state)
 
     def make_move_optimal(self, state):
-        q = self.Q[state[0]][state[1]][state[2]]
-        best_action = [[], -math.inf]
-        for action in q.keys():
-            value = q[action]
-            if value > best_action[1]:
-                best_action[0].clear()
-                best_action[0].append(action)
-                best_action[1] = value
-            elif value == best_action[1]:
-                best_action[0].append(action)
-        action = random.choice(best_action[0]) if len(
-            best_action[0]) > 1 else best_action[0][0]
+        try:
+            self.make_Q([state[0], state[1], state[2]])  # test new line
+            q = self.Q[state[0]][state[1]][state[2]]
+            best_action = [[], -math.inf]
+            for action in q.keys():
+                value = q[action]
+                if value > best_action[1]:
+                    best_action[0].clear()
+                    best_action[0].append(action)
+                    best_action[1] = value
+                elif value == best_action[1]:
+                    best_action[0].append(action)
+            action = random.choice(best_action[0]) if len(
+                best_action[0]) > 1 else best_action[0][0]
+        except Exception as e:
+            print(e)
+            pass
         return action
 
     def default_learning(self, next_state, is_terminated, state, action, reward):

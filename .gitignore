@@ -4,3 +4,4 @@ __pycache__/
 .vscode/
 .idea/
 *.pyd
+.idea/workspace.xml
