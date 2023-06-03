@@ -4,12 +4,13 @@ import math
 
 
 class QLearningAlgorythm:
-    def __init__(self, possible_moves, gamma, beta, epsilon):
+    def __init__(self, possible_moves, gamma, beta, epsilon, t):
         self.Q = {}
         self.possible_moves = possible_moves
         self.gamma = gamma
         self.beta = beta
         self.epsilon = epsilon
+        self.t = t
 
     def change_epsilon(self, new_epsilon):
         self.epsilon = new_epsilon
@@ -42,7 +43,7 @@ class QLearningAlgorythm:
             self.Q[state[0]][state[1]][state[2]] = make_temp_moves()
             return
 
-    def make_move(self, state):
+    def make_move_greedy(self, state):
         if self.epsilon > 0:
             random_int = random.randint(0, 100)
             if random_int < self.epsilon:
@@ -50,24 +51,37 @@ class QLearningAlgorythm:
                 return action
         return self.make_move_optimal(state)
 
+    def make_move_Boltzmann(self, state):
+        q_wartosci = self.Q[state[0]][state[1]][state[2]]
+
+        # Obliczanie sumy wartości Q dla wszystkich dostępnych akcji
+        suma_q = sum(math.exp(q / self.t) for q in q_wartosci.values())
+
+        # Obliczanie prawdopodobieństw dla każdej akcji
+        prawdopodobienstwa = {akcja: math.exp(q / self.t) / suma_q for akcja, q in q_wartosci.items()}
+
+        # Wybieranie akcji na podstawie prawdopodobieństw
+        losowa_wartosc = random.uniform(0, 1)
+        kumulatywna_proba = 0.0
+        for akcja, prawdopodobienstwo in prawdopodobienstwa.items():
+            kumulatywna_proba += prawdopodobienstwo
+            if losowa_wartosc <= kumulatywna_proba:
+                return akcja
+
     def make_move_optimal(self, state):
-        try:
-            self.make_Q([state[0], state[1], state[2]])  # test new line
-            q = self.Q[state[0]][state[1]][state[2]]
-            best_action = [[], -math.inf]
-            for action in q.keys():
-                value = q[action]
-                if value > best_action[1]:
-                    best_action[0].clear()
-                    best_action[0].append(action)
-                    best_action[1] = value
-                elif value == best_action[1]:
-                    best_action[0].append(action)
-            action = random.choice(best_action[0]) if len(
-                best_action[0]) > 1 else best_action[0][0]
-        except Exception as e:
-            print(e)
-            pass
+        self.make_Q([state[0], state[1], state[2]])
+        q = self.Q[state[0]][state[1]][state[2]]
+        best_action = [[], -math.inf]
+        for action in q.keys():
+            value = q[action]
+            if value > best_action[1]:
+                best_action[0].clear()
+                best_action[0].append(action)
+                best_action[1] = value
+            elif value == best_action[1]:
+                best_action[0].append(action)
+        action = random.choice(best_action[0]) if len(
+            best_action[0]) > 1 else best_action[0][0]
         return action
 
     def default_learning(self, next_state, is_terminated, state, action, reward):

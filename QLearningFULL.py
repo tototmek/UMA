@@ -38,7 +38,7 @@ tor8 = make_tor([-2, 3, 3, 7, -1, -1, -8, -5, 0, -5])
 TESTING_TORS = [tor6, tor7, tor8]
 
 
-def run_epoch(env, qlearning, max_iterations):
+def run_epoch(env, qlearning, max_iterations, is_Boltzamann=False):
     iteration = 0
     total_reward = 0
     env.reset()
@@ -53,7 +53,10 @@ def run_epoch(env, qlearning, max_iterations):
     qlearning.make_Q(old_state)
 
     while True:
-        action = qlearning.make_move(old_state)
+        if not is_Boltzamann:
+            action = qlearning.make_move_greedy(old_state)
+        else:
+            action = qlearning.make_move_Boltzmann(state=old_state)
 
         velocity, inclination, inclination_ahead, reward, is_terminal = env.step(
             action)
@@ -171,7 +174,7 @@ dodać do danych średnią predkość
 
 # test 1 szukanie najlepszych gamma, beta i epsilon
 lines = []
-lines.append(f'Gamma, Beta, Epsilon, Reached, Best, Worst, Average, Std, BestReward\n')
+lines.append(f'Gamma, Beta, Epsilon, T, LearningReached, TestingReached, Best, Worst, Average, Std, BestReward\n')
 if __name__ == "__main__":
 
     config = EnvironmentConfig()
@@ -198,38 +201,53 @@ if __name__ == "__main__":
     betas = [0.1, 0.5, 0.9]  # 0.1, 0.5, 0.9
     gammas = [0.1, 0.5, 0.9]  # 0.1, 0.5, 0.9
     epsys = [0, 5, 10, 20, 25]  # 0, 5, 10, 20, 25
+    t = 0
     for eps in epsys:
         for beta in betas:
             for gamma in gammas:
-                print(f'{40*"#"}')
-                print(f'Testing params: beta: {beta}, gamma: {gamma}, epsilon: {eps}')
-                q = QLearningAlgorythm([-1, 0, 1], gamma=gamma, beta=beta, epsilon=eps)
-                l_reached, l_data, l_reward, q = learn(500, config, q)
-                print(f'{25 * "#"}')
-                t_reached, t_data, t_reward = test(9, config, q)
-                print(f'{25*"#"}')
-                print("Learning data:")
-                print(f"Reached targets:\t{l_reached}")
-                print(f"Best time:\t{min(l_data)}")
-                # print(f"Worst time: {max(l_data)}")
-                print(f"Avg time: {np.average(l_data)}")
-                # print(f"Std: {np.std(l_data)}")
-                print(f"Best reward:\t{max(l_reward)}")
-                print(f'{25 * "#"}')
-                t_min = min(t_data)
-                t_max = max(t_data)
-                t_avg = np.average(t_data)
-                t_std = np.std(t_data)
-                print("Testing data:")
-                print(f"Reached targets: {t_reached}")
-                print(f"Best time: {t_min}")
-                # print(f"Worst time: {t_max}")
-                print(f"Avg time: {t_avg}")
-                # print(f"Std: {t_std}")
-                print(f"Best reward:\t{max(t_reward)}")
+                avg_l_reached = []
+                avg_t_reached = []
+                avg_t_min = []
+                avg_t_max = []
+                avg_t_avg = []
+                avg_t_std = []
+                avg_t_reward = []
+
+                for repeat in range(10):
+                    print(f'{40*"#"}')
+                    print(f'Testing params: beta: {beta}, gamma: {gamma}, epsilon: {eps}')
+                    q = QLearningAlgorythm([-1, 0, 1], gamma=gamma, beta=beta, epsilon=eps, t=t)
+                    l_reached, l_data, l_reward, q = learn(500, config, q)
+                    print(f'{25 * "#"}')
+                    t_reached, t_data, t_reward = test(9, config, q)
+                    print(f'{25*"#"}')
+                    print("Learning data:")
+                    print(f"Reached targets:\t{l_reached}")
+                    print(f"Best time:\t{min(l_data)}")
+                    print(f"Avg time: {np.average(l_data)}")
+                    print(f"Best reward:\t{max(l_reward)}")
+                    print(f'{25 * "#"}')
+                    t_min = min(t_data)
+                    t_max = max(t_data)
+                    t_avg = np.average(t_data)
+                    t_std = np.std(t_data)
+                    print("Testing data:")
+                    print(f"Reached targets: {t_reached}")
+                    print(f"Best time: {t_min}")
+                    print(f"Avg time: {t_avg}")
+                    print(f"Best reward:\t{max(t_reward)}")
+                    avg_l_reached.append(l_reached)
+                    avg_t_reached.append(t_reached)
+                    avg_t_min.append(t_min)
+                    avg_t_max.append(t_max)
+                    avg_t_avg.append(t_avg)
+                    avg_t_std.append(t_avg)
+                    avg_t_reward.append(max(t_reward))
 
                 lines.append(
-                f'{q.gamma}, {q.beta}, {q.epsilon}, {t_reached}, {t_min}, {t_max}, {t_avg}, {t_std}, {max(t_reward)}\n')
-    with open('out/QLdata.csv', 'w') as f:
+                f'{gamma}, {beta}, {eps}, {t}, {np.average(avg_l_reached)}, {np.average(avg_t_reached)}, '
+                f'{np.average(avg_t_min)}, {np.average(avg_t_max)}, {np.average(avg_t_avg)}, {np.average(avg_t_std)}, '
+                f'{np.average(max(avg_t_reward))}\n')
+    with open('out/QLdata_fulldata_epsilon_1.csv', 'w') as f:
         for line in lines:
             f.write(line)
