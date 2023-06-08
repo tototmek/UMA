@@ -1,8 +1,11 @@
+import random
+
 from environment import EnvironmentConfig, Environment
 import math
 import time
 import numpy as np
 import copy
+from collections import Counter
 from scripts.QL import QLearningAlgorythm
 
 
@@ -81,7 +84,7 @@ def run_epoch(env, qlearning, max_iterations, is_Boltzamann):
             return False, iteration, total_reward, qlearning
 
 
-def run_test(env, qlearning, max_iterations):
+def run_test(env, qlearning, max_iterations, hive=False):
     iteration = 0
     total_reward = 0
     env.reset()
@@ -90,7 +93,17 @@ def run_test(env, qlearning, max_iterations):
              round(inclination_ahead)]
 
     while True:
-        action = qlearning.make_move_optimal(state)
+        if hive is False:
+            action = qlearning.make_move_optimal(state)
+        else:
+            actions = [q.make_move_optimal(state) for q in qlearning]
+            counter = Counter(actions)
+            max_count = max(counter.values())
+            most_common_values = [num for num, count in counter.items() if count == max_count]
+            if len(most_common_values) > 1:
+                action = random.choice(most_common_values)
+            else:
+                action = most_common_values[0]
 
         velocity, inclination, inclination_ahead, reward, is_terminal = env.step(
             action)
@@ -109,7 +122,7 @@ def run_test(env, qlearning, max_iterations):
             return False, iteration, total_reward
 
 
-def learn(epochs, config, qlearning, is_Boltzamann=False):
+def learn(epochs, config, qlearning, is_Boltzamann=False, track=None):
     start_time = time.time()
     iteration_counts = []
     rewards = []
@@ -117,8 +130,12 @@ def learn(epochs, config, qlearning, is_Boltzamann=False):
     epoch_max_iterations = 5000
 
     for i in range(epochs):
-        config.points = LEARNING_TRACKS[int(math.floor(i/(epochs/5)))]
-        env = Environment(config)
+        if track is None:
+            config.points = LEARNING_TRACKS[int(math.floor(i/(epochs/5)))]
+            env = Environment(config)
+        else:
+            config.points = LEARNING_TRACKS[track]
+            env = Environment(config)
 
         print(f"Epoch {i}:\t", end="")
         succeeded, iterations, reward, qlearning = run_epoch(
@@ -133,31 +150,7 @@ def learn(epochs, config, qlearning, is_Boltzamann=False):
     return success_count, iteration_counts, rewards, qlearning
 
 
-def learnOnOneTrack(epochs, config, qlearning, is_Boltzamann=False):
-    start_time = time.time()
-    iteration_counts = []
-    rewards = []
-    success_count = 0
-    epoch_max_iterations = 5000
-
-    for i in range(epochs):
-        config.points = TESTING_TRACKS[int(math.floor(i/(epochs/5)))]
-        env = Environment(config)
-
-        print(f"Epoch {i}:\t", end="")
-        succeeded, iterations, reward, qlearning = run_epoch(
-            env, qlearning, epoch_max_iterations, is_Boltzamann)
-        iteration_counts.append(iterations)
-        rewards.append(reward)
-        if succeeded:
-            success_count += 1
-
-    print("Learning finished")
-    print(f'Time: {round(time.time() - start_time, 2)}[s]')
-    return success_count, iteration_counts, rewards, qlearning
-
-
-def test(epochs, config, qlearning):
+def test(epochs, config, qlearning, hive=False):
     start_time = time.time()
     iteration_counts = []
     rewards = []
@@ -170,7 +163,7 @@ def test(epochs, config, qlearning):
 
         print(f"Test {i}:\t", end="")
         succeeded, iterations, reward = run_test(
-            env, qlearning, epoch_max_iterations)
+            env, qlearning, epoch_max_iterations, hive)
         iteration_counts.append(iterations)
         rewards.append(reward)
         if succeeded:
@@ -377,59 +370,54 @@ def test_saturation():
     config.targetVelocity = 9.0
     config.maxVelocity = 10.0
 
-    gammas = [0.9]  # 0.1, 0.5, 0.9
-    betas = [0.1]  # 0.1, 0.5, 0.9
-    epsys = [0]  # 0, 5, 10, 20, 25
-    t = [0.25]
+    gamma = 0.9
+    beta = 0.1
+    t = 0.25
     iters = [5, 10, 25, 50, 75, 100, 150, 200, 250, 500, 1000]
-    for eps in epsys:
-        for t in t:
-            for beta in betas:
-                for gamma in gammas:
-                    for it in iters:
-                        avg_l_reached = []
-                        avg_t_reached = []
-                        avg_t_min = []
-                        avg_t_max = []
-                        avg_t_avg = []
-                        avg_t_std = []
-                        avg_t_reward = []
+    for it in iters:
+        avg_l_reached = []
+        avg_t_reached = []
+        avg_t_min = []
+        avg_t_max = []
+        avg_t_avg = []
+        avg_t_std = []
+        avg_t_reward = []
 
-                        for repeat in range(10):
-                            print(f'{40 * "#"}')
-                            print(f'Testing params: beta: {beta}, gamma: {gamma}, epsilon: {eps}, t: {t}, iter: {it}')
-                            q = QLearningAlgorythm([-1, 0, 1], gamma=gamma, beta=beta, epsilon=eps, t=t)
-                            l_reached, l_data, l_reward, q = learn(it, config, q, is_Boltzamann=True)  # it=500
-                            print(f'{25 * "#"}')
-                            t_reached, t_data, t_reward = test(9, config, q)
-                            print(f'{25 * "#"}')
-                            print("Learning data:")
-                            print(f"Reached targets:\t{l_reached}")
-                            print(f"Best time:\t{min(l_data)}")
-                            print(f"Avg time: {np.average(l_data)}")
-                            print(f"Best reward:\t{max(l_reward)}")
-                            print(f'{25 * "#"}')
-                            t_min = min(t_data)
-                            t_max = max(t_data)
-                            t_avg = np.average(t_data)
-                            t_std = np.std(t_data)
-                            print("Testing data:")
-                            print(f"Reached targets: {t_reached}")
-                            print(f"Best time: {t_min}")
-                            print(f"Avg time: {t_avg}")
-                            print(f"Best reward:\t{max(t_reward)}")
-                            avg_l_reached.append(l_reached)
-                            avg_t_reached.append(t_reached)
-                            avg_t_min.append(t_min)
-                            avg_t_max.append(t_max)
-                            avg_t_avg.append(t_avg)
-                            avg_t_std.append(t_avg)
-                            avg_t_reward.append(max(t_reward))
+        for repeat in range(10):
+            print(f'{40 * "#"}')
+            print(f'Testing params: beta: {beta}, gamma: {gamma}, t: {t}, iter: {it}')
+            q = QLearningAlgorythm([-1, 0, 1], gamma=gamma, beta=beta, epsilon=0, t=t)
+            l_reached, l_data, l_reward, q = learn(it, config, q, is_Boltzamann=True)
+            print(f'{25 * "#"}')
+            t_reached, t_data, t_reward = test(9, config, q)
+            print(f'{25 * "#"}')
+            print("Learning data:")
+            print(f"Reached targets:\t{l_reached}")
+            print(f"Best time:\t{min(l_data)}")
+            print(f"Avg time: {np.average(l_data)}")
+            print(f"Best reward:\t{max(l_reward)}")
+            print(f'{25 * "#"}')
+            t_min = min(t_data)
+            t_max = max(t_data)
+            t_avg = np.average(t_data)
+            t_std = np.std(t_data)
+            print("Testing data:")
+            print(f"Reached targets: {t_reached}")
+            print(f"Best time: {t_min}")
+            print(f"Avg time: {t_avg}")
+            print(f"Best reward:\t{max(t_reward)}")
+            avg_l_reached.append(l_reached)
+            avg_t_reached.append(t_reached)
+            avg_t_min.append(t_min)
+            avg_t_max.append(t_max)
+            avg_t_avg.append(t_avg)
+            avg_t_std.append(t_avg)
+            avg_t_reward.append(max(t_reward))
 
-                        lines.append(
-                            f'{it}, {np.average(avg_l_reached)}, {np.average(avg_t_reached)}, '
-                            f'{np.average(avg_t_min)}, {np.average(avg_t_max)}, {np.average(avg_t_avg)}, {np.average(avg_t_std)}, '
-                            f'{np.average(avg_t_reward)}\n')
+        lines.append(
+            f'{it}, {np.average(avg_l_reached)}, {np.average(avg_t_reached)}, '
+            f'{np.average(avg_t_min)}, {np.average(avg_t_max)}, {np.average(avg_t_avg)}, {np.average(avg_t_std)}, '
+            f'{np.average(avg_t_reward)}\n')
     with open('out/QLdata_fulldata_saturation_150.csv', 'w') as f:
         for line in lines:
             f.write(line)
@@ -437,7 +425,8 @@ def test_saturation():
 
 def test_hive5_vs1():
     lines = []
-    lines.append(f'Iters, LearningReached, TestingReached, Best, Worst, Average, Std, BestReward\n')
+    lines.append(f'SoloLearningReached, SoloTestingReached, SoloBest, SoloWorst, SoloAverage, SoloStd, SoloAverageReward,'
+                 f' HiveLearningReached, HiveTestingReached, HiveBest, HiveWorst, HiveAverage, HiveStd, HiveAverageReward\n')
     config = EnvironmentConfig()
     config.trackLength = 30
     config.cartThrustGain = 16.0
@@ -458,58 +447,61 @@ def test_hive5_vs1():
     config.targetVelocity = 9.0
     config.maxVelocity = 10.0
 
-    gammas = [0.9]
-    betas = [0.1]
-    t = [0.25]
-    iters = [100]
-    for t in t:
-        for beta in betas:
-            for gamma in gammas:
-                for it in iters:
-                    avg_l_reached = []
-                    avg_t_reached = []
-                    avg_t_min = []
-                    avg_t_max = []
-                    avg_t_avg = []
-                    avg_t_std = []
-                    avg_t_reward = []
+    gamma = 0.9
+    beta = 0.1
+    t = 0.25
+    it = 30
 
-                    for repeat in range(10):
-                        print(f'{40 * "#"}')
-                        print(f'Testing params: beta: {beta}, gamma: {gamma}, epsilon: {eps}, t: {t}, iter: {it}')
-                        q = QLearningAlgorythm([-1, 0, 1], gamma=gamma, beta=beta, epsilon=eps, t=t)
-                        l_reached, l_data, l_reward, q = learn(it, config, q, is_Boltzamann=True)  # it=500
-                        print(f'{25 * "#"}')
-                        t_reached, t_data, t_reward = test(9, config, q)
-                        print(f'{25 * "#"}')
-                        print("Learning data:")
-                        print(f"Reached targets:\t{l_reached}")
-                        print(f"Best time:\t{min(l_data)}")
-                        print(f"Avg time: {np.average(l_data)}")
-                        print(f"Best reward:\t{max(l_reward)}")
-                        print(f'{25 * "#"}')
-                        t_min = min(t_data)
-                        t_max = max(t_data)
-                        t_avg = np.average(t_data)
-                        t_std = np.std(t_data)
-                        print("Testing data:")
-                        print(f"Reached targets: {t_reached}")
-                        print(f"Best time: {t_min}")
-                        print(f"Avg time: {t_avg}")
-                        print(f"Best reward:\t{max(t_reward)}")
-                        avg_l_reached.append(l_reached)
-                        avg_t_reached.append(t_reached)
-                        avg_t_min.append(t_min)
-                        avg_t_max.append(t_max)
-                        avg_t_avg.append(t_avg)
-                        avg_t_std.append(t_avg)
-                        avg_t_reward.append(max(t_reward))
+    SoloLearningReached, SoloTestingReached, SoloTime, SoloBestReward = [], [], [], []
+    HiveLearningReached, HiveTestingReached, HiveTime, HiveBestReward = [], [], [], []
 
-                    lines.append(
-                        f'{np.average(avg_l_reached)}, {np.average(avg_t_reached)}, '
-                        f'{np.average(avg_t_min)}, {np.average(avg_t_max)}, {np.average(avg_t_avg)}, {np.average(avg_t_std)}, '
-                        f'{np.average(avg_t_reward)}\n')
-    with open('out/QLdata_fulldata_saturation_old.csv', 'w') as f:
+    for repeat in range(25):
+        print(f'{40 * "#"}')
+        # nauka 5 osobnych agentów
+        hive_q = []
+        h_l_reached, h_l_data, h_l_reward = [], [], []
+        for track_number, truck in enumerate(LEARNING_TRACKS):
+            q = QLearningAlgorythm([-1, 0, 1], gamma=gamma, beta=beta, epsilon=0, t=t)
+            l_reached, l_data, l_reward, q = learn(it, config, q, is_Boltzamann=True, track=track_number)
+            h_l_reached.append(l_reached)
+            h_l_data.append(l_data)
+            h_l_reward.append(l_reward)
+            hive_q.append(q)
+
+        # nauka 1 agenta
+        solo_q = QLearningAlgorythm([-1, 0, 1], gamma=gamma, beta=beta, epsilon=0, t=t)
+        s_l_reached, s_l_data, s_l_reward, solo_q = learn(it*len(LEARNING_TRACKS), config, solo_q, is_Boltzamann=True)
+
+        print(f'{25 * "#"}')
+        s_t_reached, s_t_data, s_t_reward = test(9, config, solo_q)
+        h_t_reached, h_t_data, h_t_reward = test(9, config, hive_q, hive=True)
+        print(f'{25 * "#"}')
+        print("Learning data:")
+        print("Hive data:")
+        HiveLearningReached.append(np.average(h_l_reached))
+        print("Solo data:")
+        SoloLearningReached.append(s_l_reached)
+
+        print(f'{25 * "#"}')
+        print("Testing data:")
+        print("Hive data:")
+        HiveTestingReached.append(h_t_reached)
+        HiveTime.append(h_t_data)
+        HiveBestReward.append(h_t_reward)
+        print("Solo data:")
+        SoloTestingReached.append(s_t_reached)
+        SoloTime.append(s_t_data)
+        SoloBestReward.append(s_t_reward)
+
+    lines.append(
+        f'{np.average(SoloLearningReached)}, {np.average(SoloTestingReached)}, '
+        f'{np.average(min(SoloTime))}, {np.average(max(SoloTime))}, {np.average(SoloTime)}, {np.std(SoloTime)}, '
+        f'{np.average(SoloBestReward)},'
+        f'{np.average(HiveLearningReached)}, {np.average(HiveTestingReached)}, '
+        f'{np.average(min(HiveTime))}, {np.average(max(HiveTime))}, {np.average(HiveTime)}, {np.std(HiveTime)}, '
+        f'{np.average(HiveBestReward)}'
+        f'\n')
+    with open('out/QLdata_fulldata_hive_vs_solo.csv', 'w') as f:
         for line in lines:
             f.write(line)
 
@@ -517,5 +509,5 @@ def test_hive5_vs1():
 if __name__ == "__main__":
     # test_params_E()
     # test_params_T()
-    test_saturation()
-    # test_hive5_vs1()
+    # test_saturation()
+    test_hive5_vs1()
