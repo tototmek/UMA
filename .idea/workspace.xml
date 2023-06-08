@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7d37075a-8817-4077-b36c-242dbf07d0fb" name="Changes" comment="tests: beta, gamma, epsilon, T, saturation completed v2">
+    <list default="true" id="7d37075a-8817-4077-b36c-242dbf07d0fb" name="Changes" comment="one (150iters) vs hive (5 * 30 iter)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/QLearningFULL.py" beforeDir="false" afterPath="$PROJECT_DIR$/QLearningFULL.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/QLdata_fulldata_hive_vs_solo.csv" beforeDir="false" afterPath="$PROJECT_DIR$/out/QLdata_fulldata_hive_vs_solo_sat.csv" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -215,7 +216,14 @@
       <option name="project" value="LOCAL" />
       <updated>1686212208010</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="one (150iters) vs hive (5 * 30 iter)">
+      <created>1686239114775</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1686239114775</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -236,7 +244,8 @@
     <MESSAGE value="2 excels" />
     <MESSAGE value="tests: beta, gamma, epsilon, T, saturation completed" />
     <MESSAGE value="tests: beta, gamma, epsilon, T, saturation completed v2" />
-    <option name="LAST_COMMIT_MESSAGE" value="tests: beta, gamma, epsilon, T, saturation completed v2" />
+    <MESSAGE value="one (150iters) vs hive (5 * 30 iter)" />
+    <option name="LAST_COMMIT_MESSAGE" value="one (150iters) vs hive (5 * 30 iter)" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

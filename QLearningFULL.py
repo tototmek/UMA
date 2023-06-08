@@ -450,7 +450,7 @@ def test_hive5_vs1():
     gamma = 0.9
     beta = 0.1
     t = 0.25
-    it = 30
+    it = 10
 
     SoloLearningReached, SoloTestingReached, SoloTime, SoloBestReward = [], [], [], []
     HiveLearningReached, HiveTestingReached, HiveTime, HiveBestReward = [], [], [], []
@@ -501,7 +501,7 @@ def test_hive5_vs1():
         f'{np.average(min(HiveTime))}, {np.average(max(HiveTime))}, {np.average(HiveTime)}, {np.std(HiveTime)}, '
         f'{np.average(HiveBestReward)}'
         f'\n')
-    with open('out/QLdata_fulldata_hive_vs_solo.csv', 'w') as f:
+    with open('out/QLdata_fulldata_hive_vs_solo_not_sat.csv', 'w') as f:
         for line in lines:
             f.write(line)
 
