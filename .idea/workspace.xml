@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7d37075a-8817-4077-b36c-242dbf07d0fb" name="Changes" comment="2 main datasets">
+    <list default="true" id="7d37075a-8817-4077-b36c-242dbf07d0fb" name="Changes" comment="2 excels">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/QLearningFULL.py" beforeDir="false" afterPath="$PROJECT_DIR$/QLearningFULL.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/QLdata_fulldata_T.csv" beforeDir="false" afterPath="$PROJECT_DIR$/out/QLdata_fulldata_T_old.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/QLdata_fulldata_epsilon.csv" beforeDir="false" afterPath="$PROJECT_DIR$/out/QLdata_fulldata_epsilon_old.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/T_data.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/out/T_data_old.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/epsilon_data.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/out/epsilon_data_old.xlsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -193,7 +198,14 @@
       <option name="project" value="LOCAL" />
       <updated>1686080146692</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="2 excels">
+      <created>1686080935986</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1686080935986</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -211,7 +223,8 @@
     <MESSAGE value="a lot of data - all day of working xD" />
     <MESSAGE value="a lot of data - all 2 day of working xD, testing parameters completed" />
     <MESSAGE value="2 main datasets" />
-    <option name="LAST_COMMIT_MESSAGE" value="2 main datasets" />
+    <MESSAGE value="2 excels" />
+    <option name="LAST_COMMIT_MESSAGE" value="2 excels" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
