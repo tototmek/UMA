@@ -220,13 +220,7 @@ def test_params_E():  # epsilon zachłanna
     for eps in epsys:
         for beta in betas:
             for gamma in gammas:
-                avg_l_reached = []
-                avg_t_reached = []
-                avg_t_min = []
-                avg_t_max = []
-                avg_t_avg = []
-                avg_t_std = []
-                avg_t_reward = []
+                avg_l_reached, avg_t_reached, avg_t_min, avg_t_max, avg_t_avg, avg_t_std, avg_t_reward = [], [], [], [], [], [], []
 
                 for repeat in range(10):
                     print(f'{40 * "#"}')
@@ -299,13 +293,7 @@ def test_params_T():  # strategia boltzmanna
     for t in t:
         for beta in betas:
             for gamma in gammas:
-                avg_l_reached = []
-                avg_t_reached = []
-                avg_t_min = []
-                avg_t_max = []
-                avg_t_avg = []
-                avg_t_std = []
-                avg_t_reward = []
+                avg_l_reached, avg_t_reached, avg_t_min, avg_t_max, avg_t_avg, avg_t_std, avg_t_reward = [], [], [], [], [], [], []
 
                 for repeat in range(10):
                     print(f'{40 * "#"}')
@@ -375,13 +363,7 @@ def test_saturation():
     t = 0.25
     iters = [5, 10, 25, 50, 75, 100, 150, 200, 250, 500, 1000]
     for it in iters:
-        avg_l_reached = []
-        avg_t_reached = []
-        avg_t_min = []
-        avg_t_max = []
-        avg_t_avg = []
-        avg_t_std = []
-        avg_t_reward = []
+        avg_l_reached, avg_t_reached, avg_t_min, avg_t_max, avg_t_avg, avg_t_std, avg_t_reward = [], [], [], [], [], [], []
 
         for repeat in range(10):
             print(f'{40 * "#"}')
@@ -506,8 +488,66 @@ def test_hive5_vs1():
             f.write(line)
 
 
+def test_env_impact():
+    lines = []
+    lines.append(f'Number of tracks, LearningReached, TestingReached, '
+                 f'Best, Worst, Average, Std, AverageReward\n')
+    config = EnvironmentConfig()
+    config.trackLength = 30
+    config.cartThrustGain = 16.0
+    config.gravity = 9.81
+    config.efficiency = 0.995
+
+    config.simDeltatime = 0.005
+    config.simStepsPerStep = 6
+    config.inclinationLookAheadDistance = 1.0
+
+    config.positionRewardGain = 1.0
+    config.velocityRewardGain = 0.0
+    config.timePenaltyGain = 0.1
+    config.reversingPenaltyGain = 0.0
+    config.overspeedPenaltyGain = 0.0
+    config.finishRewardGain = 42.0
+
+    config.targetVelocity = 9.0
+    config.maxVelocity = 10.0
+
+    gamma = 0.9
+    beta = 0.1
+    t = 0.25
+    it = 150
+
+    for i in range(5):
+        LearningReached, TestingReached, Time, BestReward = [], [], [], []
+        for repeat in range(10):
+            print(f'{40 * "#"}')
+
+            q = QLearningAlgorythm([-1, 0, 1], gamma=gamma, beta=beta, epsilon=0, t=t)
+            l_reached = []
+            for j in range(i+1):
+                l_reach, l_data, l_reward, q = learn(int(it/(i+1)), config, q, is_Boltzamann=True, track=j)
+                l_reached.append(np.average(l_reach))
+
+            t_reached, t_data, t_reward = test(9, config, q)
+            LearningReached.append(np.average(l_reached))
+            TestingReached.append(np.average(t_reached))
+            Time.append(t_data)
+            BestReward.append(t_reward)
+
+        lines.append(
+            f'{i+1}, '
+            f'{np.average(LearningReached)}, {np.average(TestingReached)}, '
+            f'{np.average(min(Time))}, {np.average(max(Time))}, {np.average(Time)}, {np.std(Time)}, '
+            f'{np.average(BestReward)}'
+            f'\n')
+    with open('out/QLdata_fulldata_env_impact.csv', 'w') as f:
+        for line in lines:
+            f.write(line)
+
+
 if __name__ == "__main__":
     # test_params_E()
     # test_params_T()
     # test_saturation()
-    test_hive5_vs1()
+    # test_hive5_vs1()
+    test_env_impact()
