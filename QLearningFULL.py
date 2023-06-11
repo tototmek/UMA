@@ -9,18 +9,6 @@ from collections import Counter
 from scripts.QL import QLearningAlgorythm
 
 
-"""
-Założenia:
-Algorytm ma 100k iteracji na naukę
-potem ma 10K iteracji testujących
-Kryterium porównawcze:
-Liczność osiągnieć celu podczas testów
-Ograniczenia:
-maksymalna prędkość 10 - powyżej 10 stan terminalny
-Dodatkowe elementy algorytmu uczącego:
-
-"""
-
 def make_tor(Ys):
     tor = [(0, 0)]
     x = 3
@@ -28,6 +16,7 @@ def make_tor(Ys):
         tor.append((x, y))
         x += 3
     return tor
+
 
 tor1 = make_tor([2, -4, 4, -2, 3, -2, 6, 3, 5, -3])
 tor2 = make_tor([-3, 5, 3, 6, -2, 3, -2, 4, -4, 2])
@@ -152,6 +141,7 @@ def learn(epochs, config, qlearning, is_Boltzamann=False, track=None):
 
 def test(epochs, config, qlearning, hive=False):
     start_time = time.time()
+
     iteration_counts = []
     rewards = []
     success_count = 0
@@ -169,48 +159,14 @@ def test(epochs, config, qlearning, hive=False):
         if succeeded:
             success_count += 1
 
-    print("Learning finished")
+    print("testing finished")
     print(f'Time: {round(time.time() - start_time, 2)}[s]')
     return success_count, iteration_counts, rewards
 
 
-"""
-2 metoda uczenia w QL
-
-200k iter na uczenie
-co 50k zmiana mapy
-
-V > Vmax -> stan terminalny i zdycha -> dałbym 10
-
-beta, gamma, epsilon, strategie wyboru akcji, modyfikacja nagród
-poszukiwanie najlepszego agenta
-
-dodać do danych średnią predkość
-"""
-
-
-def test_params_E():  # epsilon zachłanna
+def test_params_E(config):  # epsilon zachłanna
     lines = []
     lines.append(f'Gamma, Beta, Epsilon, LearningReached, TestingReached, Best, Worst, Average, Std, BestReward\n')
-    config = EnvironmentConfig()
-    config.trackLength = 30
-    config.cartThrustGain = 16.0
-    config.gravity = 9.81
-    config.efficiency = 0.995
-
-    config.simDeltatime = 0.005
-    config.simStepsPerStep = 6
-    config.inclinationLookAheadDistance = 1.0
-
-    config.positionRewardGain = 1.0
-    config.velocityRewardGain = 0.0
-    config.timePenaltyGain = 0.1
-    config.reversingPenaltyGain = 0.0
-    config.overspeedPenaltyGain = 0.0
-    config.finishRewardGain = 42.0
-
-    config.targetVelocity = 9.0
-    config.maxVelocity = 10.0
 
     gammas = [0.1, 0.5, 0.9]  # 0.1, 0.5, 0.9
     betas = [0.1, 0.5, 0.9]  # 0.1, 0.5, 0.9
@@ -262,28 +218,9 @@ def test_params_E():  # epsilon zachłanna
             f.write(line)
 
 
-def test_params_T():  # strategia boltzmanna
+def test_params_T(config):  # strategia boltzmanna
     lines = []
     lines.append(f'Gamma, Beta, T, LearningReached, TestingReached, Best, Worst, Average, Std, BestReward\n')
-    config = EnvironmentConfig()
-    config.trackLength = 30
-    config.cartThrustGain = 16.0
-    config.gravity = 9.81
-    config.efficiency = 0.995
-
-    config.simDeltatime = 0.005
-    config.simStepsPerStep = 6
-    config.inclinationLookAheadDistance = 1.0
-
-    config.positionRewardGain = 1.0
-    config.velocityRewardGain = 0.0
-    config.timePenaltyGain = 0.1
-    config.reversingPenaltyGain = 0.0
-    config.overspeedPenaltyGain = 0.0
-    config.finishRewardGain = 42.0
-
-    config.targetVelocity = 9.0
-    config.maxVelocity = 10.0
 
     gammas = [0.1, 0.5, 0.9]  # 0.1, 0.5, 0.9
     betas = [0.1, 0.5, 0.9]  # 0.1, 0.5, 0.9
@@ -335,28 +272,9 @@ def test_params_T():  # strategia boltzmanna
             f.write(line)
 
 
-def test_saturation():
+def test_saturation(config):
     lines = []
     lines.append(f'Iters, LearningReached, TestingReached, Best, Worst, Average, Std, BestReward\n')
-    config = EnvironmentConfig()
-    config.trackLength = 30
-    config.cartThrustGain = 16.0
-    config.gravity = 9.81
-    config.efficiency = 0.995
-
-    config.simDeltatime = 0.005
-    config.simStepsPerStep = 6
-    config.inclinationLookAheadDistance = 1.0
-
-    config.positionRewardGain = 1.0
-    config.velocityRewardGain = 0.0
-    config.timePenaltyGain = 0.1
-    config.reversingPenaltyGain = 0.0
-    config.overspeedPenaltyGain = 0.0
-    config.finishRewardGain = 42.0
-
-    config.targetVelocity = 9.0
-    config.maxVelocity = 10.0
 
     gamma = 0.9
     beta = 0.1
@@ -405,29 +323,10 @@ def test_saturation():
             f.write(line)
 
 
-def test_hive5_vs1():
+def test_hive5_vs1(config):
     lines = []
     lines.append(f'SoloLearningReached, SoloTestingReached, SoloBest, SoloWorst, SoloAverage, SoloStd, SoloAverageReward,'
                  f' HiveLearningReached, HiveTestingReached, HiveBest, HiveWorst, HiveAverage, HiveStd, HiveAverageReward\n')
-    config = EnvironmentConfig()
-    config.trackLength = 30
-    config.cartThrustGain = 16.0
-    config.gravity = 9.81
-    config.efficiency = 0.995
-
-    config.simDeltatime = 0.005
-    config.simStepsPerStep = 6
-    config.inclinationLookAheadDistance = 1.0
-
-    config.positionRewardGain = 1.0
-    config.velocityRewardGain = 0.0
-    config.timePenaltyGain = 0.1
-    config.reversingPenaltyGain = 0.0
-    config.overspeedPenaltyGain = 0.0
-    config.finishRewardGain = 42.0
-
-    config.targetVelocity = 9.0
-    config.maxVelocity = 10.0
 
     gamma = 0.9
     beta = 0.1
@@ -488,29 +387,10 @@ def test_hive5_vs1():
             f.write(line)
 
 
-def test_env_impact():
+def test_env_impact(config):
     lines = []
     lines.append(f'Number of tracks, LearningReached, TestingReached, '
                  f'Best, Worst, Average, Std, AverageReward\n')
-    config = EnvironmentConfig()
-    config.trackLength = 30
-    config.cartThrustGain = 16.0
-    config.gravity = 9.81
-    config.efficiency = 0.995
-
-    config.simDeltatime = 0.005
-    config.simStepsPerStep = 6
-    config.inclinationLookAheadDistance = 1.0
-
-    config.positionRewardGain = 1.0
-    config.velocityRewardGain = 0.0
-    config.timePenaltyGain = 0.1
-    config.reversingPenaltyGain = 0.0
-    config.overspeedPenaltyGain = 0.0
-    config.finishRewardGain = 42.0
-
-    config.targetVelocity = 9.0
-    config.maxVelocity = 10.0
 
     gamma = 0.9
     beta = 0.1
@@ -545,9 +425,48 @@ def test_env_impact():
             f.write(line)
 
 
+def learnSoloAgent(config):
+    gamma = 0.9
+    beta = 0.1
+    t = 0.25
+    it = 150
+    print(f'{40 * "#"}')
+
+    q = QLearningAlgorythm([-1, 0, 1], gamma=gamma, beta=beta, epsilon=0, t=t)
+    l_reached = []
+    i = 3
+    for j in range(i + 1):
+        l_reach, l_data, l_reward, q = learn(int(it / (i + 1)), config, q, is_Boltzamann=True, track=j)
+        l_reached.append(np.average(l_reach))
+
+    t_reached, t_data, t_reward = test(9, config, q)
+    q.save_Q("QLKnowledge/bestAgent.json")
+
+
 if __name__ == "__main__":
-    # test_params_E()
-    # test_params_T()
-    # test_saturation()
-    # test_hive5_vs1()
-    test_env_impact()
+    config = EnvironmentConfig()
+    config.trackLength = 30
+    config.cartThrustGain = 16.0
+    config.gravity = 9.81
+    config.efficiency = 0.995
+
+    config.simDeltatime = 0.005
+    config.simStepsPerStep = 6
+    config.inclinationLookAheadDistance = 1.0
+
+    config.positionRewardGain = 1.0
+    config.velocityRewardGain = 0.0
+    config.timePenaltyGain = 0.1
+    config.reversingPenaltyGain = 0.0
+    config.overspeedPenaltyGain = 0.0
+    config.finishRewardGain = 42.0
+
+    config.targetVelocity = 9.0
+    config.maxVelocity = 10.0
+
+    # test_params_E(config)
+    # test_params_T(config)
+    # test_saturation(config)
+    # test_hive5_vs1(config)
+    # test_env_impact(config)
+    learnSoloAgent(config)

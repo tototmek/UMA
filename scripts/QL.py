@@ -52,21 +52,17 @@ class QLearningAlgorythm:
         return self.make_move_optimal(state)
 
     def make_move_Boltzmann(self, state):
-        q_wartosci = self.Q[state[0]][state[1]][state[2]]
+        q_values = self.Q[state[0]][state[1]][state[2]]
 
-        # Obliczanie sumy wartości Q dla wszystkich dostępnych akcji
-        suma_q = sum(math.exp(q / self.t) for q in q_wartosci.values())
+        sum_q = sum(math.exp(q / self.t) for q in q_values.values())
 
-        # Obliczanie prawdopodobieństw dla każdej akcji
-        prawdopodobienstwa = {akcja: math.exp(q / self.t) / suma_q for akcja, q in q_wartosci.items()}
-
-        # Wybieranie akcji na podstawie prawdopodobieństw
-        losowa_wartosc = random.uniform(0, 1)
-        kumulatywna_proba = 0.0
-        for akcja, prawdopodobienstwo in prawdopodobienstwa.items():
-            kumulatywna_proba += prawdopodobienstwo
-            if losowa_wartosc <= kumulatywna_proba:
-                return akcja
+        probabilities = {action: math.exp(q / self.t) / sum_q for action, q in q_values.items()}
+        random_value = random.uniform(0, 1)
+        sample = 0.0
+        for action, probability in probabilities.items():
+            sample += probability
+            if random_value <= sample:
+                return action
 
     def make_move_optimal(self, state):
         self.make_Q([state[0], state[1], state[2]])
@@ -102,3 +98,8 @@ class QLearningAlgorythm:
 
         with open(file_name, "w") as outfile:
             outfile.write(json_object)
+
+    def load_Q(self, file_name):
+        with open(file_name) as file:
+            self.Q = json.load(file)
+
